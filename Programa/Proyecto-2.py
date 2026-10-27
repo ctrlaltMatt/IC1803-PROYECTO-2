@@ -41,12 +41,10 @@ def cargar_nivel(nombre_archi):
 #R: N/A
 def validar_matriz(m):
     if not isinstance(m, list) or m == []:
-        print("ERROR2")
         return False
     #Para validar que sea rectangular 
     for fila in m:
         if len(fila) != len(m[0]):
-            print("ERROR1")
             return False
     
     jugador = 0
@@ -60,7 +58,6 @@ def validar_matriz(m):
         while j < len(m[0]):
             if i == 0 or i == len(m)-1 or j == 0 or j == len(m[0])-1:
                 if m[i][j] != "#":
-                    print("ERROR3")
                     return False
             if m[i][j] == "J":
                 jugador += 1
@@ -78,11 +75,9 @@ def validar_matriz(m):
         i += 1
 
     if jugador != 1 or salida != 1 or not objeto:
-        print("ERROR4")
         return False
 
     if not validar_llaves(puerta_llave):
-        print("ERROR5")
         return False
 
     return True
@@ -116,7 +111,6 @@ def validar_llaves(puerta_llave):
             k += 1
         
     if puerta_llave != []:
-        print("ERROR6")
         return False
 
     #Luego busca coincidencias.
@@ -131,12 +125,121 @@ def validar_llaves(puerta_llave):
                 
         i += 1
     if puertas_encont != [] or llaves_encont != []:
-        print("ERROR7")
         return False
     
     return True 
+
+
+
+
+#E:
+#S:
+#R:
+def mover_jugador(matriz, direccion):
+    i = 0
+
+#E:
+#S:
+#R:
+def validar_mov():
+    i = 0
+
+
+#E:
+#S:
+#R:
+def mover_guardias(matriz):
+    i = 0
+
+#E:
+#S:
+#R:
+def patrullas():
+    i = 0
+
+#E:
+#S:
+#R:
+def vigilante():
+    i = 0
+
+#E:
+#S:
+#R:
+def verificar_captura():
+    i = 0
+
+
+#E:
+#S:
+#R:
+def dibujar_matriz():
+    i = 0
     
-    
+
+#E:
+#S:
+#R:
+def actualizar_matriz():
+    i = 0
+
+#E:
+#S:
+#R:
+#def
+
+ventana = tk.Tk()
+ventana.title("Laberinto")
+ventana.geometry("800x550")
+ventana.config(padx=20 , pady=20)
+
+tk.Label(ventana,
+         text="Laberinto",
+         font=("Arial", 12)
+         ).pack()
+
+
+
+#------------- Frames para acomodar los labels de forma más facil y ordenada -------
+arriba = tk.Frame(ventana,
+                  bg = "gray",
+                  width= 200,
+                  height=100,
+                  )
+arriba.pack_propagate(False)
+arriba.pack(side="top", fill = "x")
+
+abajo = tk.Frame(ventana,
+                  bg = "gray",
+                  width= 200,
+                  height=100,
+                  )
+abajo.pack_propagate(False)
+abajo.pack(side="bottom", fill = "x")
+
+izq = tk.Frame(ventana,
+                  bg = "orange",
+                  width= 200,
+                  height=100,
+                  )
+izq.pack_propagate(False)
+izq.pack(side="right", fill= "y")
+#En el de la izq van los datos 
+
+
+cen = tk.Frame(ventana,
+                  bg = "yellow",
+                  width= 200,
+                  height=100,
+                  )
+cen.pack_propagate(False)
+cen.pack(side = "left", expand=True, fill= "both")
+
+#----------------------------------------------------------------------------------
+
+
+ventana.mainloop()
+
 
 
 
