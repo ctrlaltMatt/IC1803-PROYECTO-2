@@ -188,15 +188,35 @@ def actualizar_matriz():
 #R:
 #def
 
+#------------------------Interfaz grafica -------------------------------------#
+
+#E:
+#S:
+#R:
+def menu_principal():
+    #Primero limpiar todos los frames, incluso si no los vamos a utilizar, solo se deja el boton de "salir/volver"
+    listaa = arriba.winfo_children()
+    listaa += abajo.winfo_children()
+    listaa += izq.winfo_children()
+    listaa += cen.winfo_children()
+    for elemento in listaa:
+        elemento.destroy()
+
+    nueva = tk.Button(cen,
+                      text="Iniciar nueva partida",
+                      command=lambda : print("Click")
+                      )
+    
+    nueva.pack(side= "right", expand = True)
+             
+    
+
+    
+
 ventana = tk.Tk()
 ventana.title("Laberinto")
 ventana.geometry("800x550")
 ventana.config(padx=20 , pady=20)
-
-tk.Label(ventana,
-         text="Laberinto",
-         font=("Arial", 12)
-         ).pack()
 
 
 
@@ -237,7 +257,13 @@ cen.pack(side = "left", expand=True, fill= "both")
 
 #----------------------------------------------------------------------------------
 
+tk.Label(arriba,
+         text="Laberinto",
+         fg = "white",
+         font=("Arial", 12)
+         ).pack()
 
+menu_principal()
 ventana.mainloop()
 
 
