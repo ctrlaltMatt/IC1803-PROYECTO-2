@@ -190,24 +190,168 @@ def actualizar_matriz():
 
 #------------------------Interfaz grafica -------------------------------------#
 
-#E:
-#S:
-#R:
+#E: Vacio
+#S: Limpia todos los frames antes de crar los nuevos correspondientes al menu principal
+#R:N/A
 def menu_principal():
     #Primero limpiar todos los frames, incluso si no los vamos a utilizar, solo se deja el boton de "salir/volver"
     listaa = arriba.winfo_children()
     listaa += abajo.winfo_children()
-    listaa += izq.winfo_children()
+    listaa += der.winfo_children()
+    listaa += cen.winfo_children()
+    #Limpiar todos los frames(Areas separadas donde se encuentran determinados botones o labels)
+    for elemento in listaa:
+        elemento.destroy()
+
+    titulo = tk.Label(arriba,
+                      text="Laberinto",
+                      fg = "black",
+                      font=("Arial", 16)
+                      )
+    titulo.pack(expand = True)
+    #Botones del menu principal
+
+    nueva = tk.Button(cen,
+                      text="Iniciar nueva partida",
+                      command=lambda : seleccionar_nivel()
+                      )
+    
+    nueva.pack( expand = True)
+    cargar = tk.Button(cen,
+                       text="Continuar partida",
+                       command=lambda : print("cargar")
+                       )
+    cargar.pack( expand = True)
+    consultar = tk.Button(cen,
+                          text="Mejores marcas",
+                          command=lambda : mejores_marcas()
+                          )
+    consultar.pack( expand = True)
+    salir = tk.Button(cen,
+                      text="Salir",
+                      command=ventana.destroy
+                      )
+    salir.pack( expand = True)
+
+
+#E:
+#S:
+#R:
+def seleccionar_nivel():
+    #Debe pedir que ingrese un nombre de usuario para continuar
+    #Este crea un .txt (o lo añade a uno) donde se coloca el nombre junto a algun simbolo de la cantidad de niveles superado
+    #Depediendo de ese .txt desbloquea los niveles
+    
+        #---------------------
+    #Se necesita una funcion para leer, agregar/crear .txt con esa informacion y que de ahi vaya a niveles
+    #Asi se puede reutilizar esta para iniciar nueva partida y cargar una. Ambas piden nombre del usuario
+         #-------------------
+    
+    listaa = arriba.winfo_children()
+    listaa += abajo.winfo_children()
+    listaa += der.winfo_children()
     listaa += cen.winfo_children()
     for elemento in listaa:
         elemento.destroy()
 
-    nueva = tk.Button(cen,
-                      text="Iniciar nueva partida",
-                      command=lambda : print("Click")
+    titulo = tk.Label(arriba,
+                      text="Laberinto",
+                      fg = "black",
+                      font=("Arial", 16)
+                      )
+    titulo.pack(expand = True)
+
+    volver = tk.Button(arriba,
+                      text="Volver",
+                      command=lambda : menu_principal()
                       )
     
-    nueva.pack(side= "right", expand = True)
+    volver.pack(side = "right", expand = True)
+
+    #Llamar a una auxiliar que abra el .txt de cuantos niveles hay y imprima botones "Nivel i". 
+
+    nivel1 = tk.Button(der,
+                      text="Nivel 1",
+                      command=lambda : print("Nivel 1")
+                      )
+    
+    nivel1.pack(expand = True)
+    info1 = tk.Label(cen,
+                     text="Bodega abandonada. Limite movimientos: 45. Mejor marca: 36",
+                     )
+    
+    info1.pack(expand = True)
+
+
+    
+
+    nivel2 = tk.Button(der,
+                      text="Nivel 2",
+                      command=lambda : print("Nivel 2")
+                      )
+    
+    nivel2.pack(expand = True)
+    info2 = tk.Label(cen,
+                     text="Playa de dia. Limite movimientos: 38. Mejor marca: 26",
+                     )
+    
+    info2.pack(expand = True)
+
+
+    
+
+    nivel3 = tk.Button(der,
+                      text="Nivel 3",
+                      command=lambda : print("Nivel 3")
+                      )
+    
+    nivel3.pack(expand = True)
+    info3 = tk.Label(cen,
+                     text="Desierto. Limite movimientos: 50. Mejor marca: 42",
+                     )
+    
+    info3.pack(expand = True)
+
+
+#E: Vacio
+#S: Muestra una lista con el nombre del nivel, la cantidad minima de movimientos con la que se superó y el jugador que lo supero
+#R: N/A
+def mejores_marcas():
+    listaa = arriba.winfo_children()
+    listaa += abajo.winfo_children()
+    listaa += der.winfo_children()
+    listaa += cen.winfo_children()
+    for elemento in listaa:
+        elemento.destroy()
+        
+    #Funcion que revise marcas.txt y que por cada nivel muestre toda la info
+    ranking = tk.Label(der,
+                      text= "Nivel 3",
+                      )
+    
+    ranking.pack(expand = True)
+    marca = tk.Label(cen,
+                     text="Nivel:  \t  Mejores marcas:  \t  Jugador: ",
+                     )
+    
+    marca.pack(expand = True)
+
+    #Aqui va la auxiliar que muestra lo que esta en el .txt
+
+    titulo = tk.Label(arriba,
+                      text="Mejores marcas",
+                      fg = "black",
+                      font=("Arial", 16)
+                      )
+    titulo.pack(expand = True)
+
+    volver = tk.Button(arriba,
+                      text="Volver",
+                      command=lambda : menu_principal()
+                      )
+    
+    volver.pack(side = "right", expand = True)
+
              
     
 
@@ -237,13 +381,13 @@ abajo = tk.Frame(ventana,
 abajo.pack_propagate(False)
 abajo.pack(side="bottom", fill = "x")
 
-izq = tk.Frame(ventana,
+der = tk.Frame(ventana,
                   bg = "orange",
                   width= 200,
                   height=100,
                   )
-izq.pack_propagate(False)
-izq.pack(side="right", fill= "y")
+der.pack_propagate(False)
+der.pack(side="right", fill= "y")
 #En el de la izq van los datos 
 
 
@@ -257,11 +401,6 @@ cen.pack(side = "left", expand=True, fill= "both")
 
 #----------------------------------------------------------------------------------
 
-tk.Label(arriba,
-         text="Laberinto",
-         fg = "white",
-         font=("Arial", 12)
-         ).pack()
 
 menu_principal()
 ventana.mainloop()
