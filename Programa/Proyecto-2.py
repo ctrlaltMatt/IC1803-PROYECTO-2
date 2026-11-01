@@ -213,13 +213,13 @@ def menu_principal():
 
     nueva = tk.Button(cen,
                       text="Iniciar nueva partida",
-                      command=lambda : seleccionar_nivel()
+                      command=lambda : escribir_usuario()
                       )
     
     nueva.pack( expand = True)
     cargar = tk.Button(cen,
                        text="Continuar partida",
-                       command=lambda : print("cargar")
+                       command=lambda : escribir_usuario()
                        )
     cargar.pack( expand = True)
     consultar = tk.Button(cen,
@@ -234,6 +234,61 @@ def menu_principal():
     salir.pack( expand = True)
 
 
+
+#E:
+#S:
+#R:
+def escribir_usuario():
+    listaa = arriba.winfo_children()
+    listaa += abajo.winfo_children()
+    listaa += der.winfo_children()
+    listaa += cen.winfo_children()
+    for elemento in listaa:
+        elemento.destroy()
+        
+    nombre_usuario = tk.Entry(cen)
+    nombre_usuario.pack()
+
+    enviar = tk.Button(cen,
+                       text="Enviar",
+                       command = lambda : validar_usuario(nombre_usuario)
+                       )
+    enviar.pack()
+    volver = tk.Button(arriba,
+                          text="Volver",
+                          command=lambda : menu_principal()
+                          )
+        
+    volver.pack(side = "right", expand = True)
+    
+
+#E: Vacio
+#S: retorna False si no encuentra alguna coincidencia con progreso.txt y True si encuentra coincidencias. Y dependiendo del modo de juego en el que se encuentre se guarda carga la partida o se crea una nueva
+#R: Debe ser un nombre de un usuario, no vacio ni numeros
+def validar_usuario(nombre_user):
+    usuario = nombre_user.get()
+    
+    #Se compara con los elementos de progreso.txt (Por si existe) Dependiendo del modo, empieza a jugar, o crea el nuevo usuario, o le dice que hay un error
+    if usuario.strip() == "":
+        error = tk.Label(arriba,
+                         text="Error, nombre debe ser diferente de vacio o un numero",
+                         fg = "red",
+                         )
+        error.pack(expand = True)
+
+    with open("progreso.txt", "r") as nombreUsuarios:
+        usuarios = nombreUsuarios.readlines()
+        i = 0
+        while i < len(usuarios):
+            if usuario == usuarios[0]:
+                return True
+            i += 1
+        return False
+    seleccionar_nivel()
+        #O ir a cargar_partida()
+    
+
+
 #E:
 #S:
 #R:
@@ -246,7 +301,6 @@ def seleccionar_nivel():
     #Se necesita una funcion para leer, agregar/crear .txt con esa informacion y que de ahi vaya a niveles
     #Asi se puede reutilizar esta para iniciar nueva partida y cargar una. Ambas piden nombre del usuario
          #-------------------
-    
     listaa = arriba.winfo_children()
     listaa += abajo.winfo_children()
     listaa += der.winfo_children()
@@ -254,63 +308,64 @@ def seleccionar_nivel():
     for elemento in listaa:
         elemento.destroy()
 
-    titulo = tk.Label(arriba,
-                      text="Laberinto",
-                      fg = "black",
-                      font=("Arial", 16)
-                      )
-    titulo.pack(expand = True)
+    if validar_usuario():
+        titulo = tk.Label(arriba,
+                          text="Laberinto",
+                          fg = "black",
+                          font=("Arial", 16)
+                          )
+        titulo.pack(expand = True)
 
-    volver = tk.Button(arriba,
-                      text="Volver",
-                      command=lambda : menu_principal()
-                      )
-    
-    volver.pack(side = "right", expand = True)
+        volver = tk.Button(arriba,
+                          text="Volver",
+                          command=lambda : menu_principal()
+                          )
+        
+        volver.pack(side = "right", expand = True)
 
-    #Llamar a una auxiliar que abra el .txt de cuantos niveles hay y imprima botones "Nivel i". 
+        #Llamar a una auxiliar que abra el .txt de cuantos niveles hay y imprima botones "Nivel i".
+        mostrar_niveles()
 
+        
+    else:
+        i = 0
+        #Ir a cargar partida
+
+
+#E:
+#S:
+#R:
+def mostrar_niveles():
     nivel1 = tk.Button(der,
-                      text="Nivel 1",
-                      command=lambda : print("Nivel 1")
-                      )
-    
+                       text="Nivel 1",
+                       command=lambda : print("Nivel 1")
+                       )
     nivel1.pack(expand = True)
     info1 = tk.Label(cen,
                      text="Bodega abandonada. Limite movimientos: 45. Mejor marca: 36",
                      )
-    
     info1.pack(expand = True)
-
-
-    
-
     nivel2 = tk.Button(der,
-                      text="Nivel 2",
-                      command=lambda : print("Nivel 2")
-                      )
-    
+                       text="Nivel 2",
+                       command=lambda : print("Nivel 2")
+                       )
     nivel2.pack(expand = True)
     info2 = tk.Label(cen,
                      text="Playa de dia. Limite movimientos: 38. Mejor marca: 26",
                      )
-    
     info2.pack(expand = True)
-
-
-    
+    nivel2.config(state = "disabled")
 
     nivel3 = tk.Button(der,
-                      text="Nivel 3",
-                      command=lambda : print("Nivel 3")
-                      )
-    
+                       text="Nivel 3",
+                       command=lambda : print("Nivel 3")
+                       )
     nivel3.pack(expand = True)
     info3 = tk.Label(cen,
                      text="Desierto. Limite movimientos: 50. Mejor marca: 42",
                      )
-    
     info3.pack(expand = True)
+    nivel3.config(state = "disabled")
 
 
 #E: Vacio
@@ -361,6 +416,7 @@ ventana = tk.Tk()
 ventana.title("Laberinto")
 ventana.geometry("800x550")
 ventana.config(padx=20 , pady=20)
+ventana.resizable(False, False)
 
 
 
