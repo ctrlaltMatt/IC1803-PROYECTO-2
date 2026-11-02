@@ -1,1 +1,12 @@
-Matt;3
+Matt;nivel2
+Maria;1
+Juan;1
+Robert;1
+Susan;1
+Fede;1
+Julian;1
+Jose;1
+Maia;1
+Mario;1
+Maitane;1
+Mahalia;1

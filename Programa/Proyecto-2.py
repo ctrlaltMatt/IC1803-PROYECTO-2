@@ -4,6 +4,13 @@ import tkinter as tk
 global nombre_nivel #Str
 global cant_max_mov #Int
 global matriz #List
+global modo_juego #str
+global usuario #str
+nombre_nivel = ""
+cant_max_mov = 0
+matriz = []
+modo_juego = ""
+nombre_usuario_global = ""
 
 #E: Recibe el nombre de archivo del nivel que se selecciono por el usuario
 #S: Retorna una matriz interna que sera en la que se modificara todo
@@ -141,7 +148,7 @@ def mover_jugador(matriz, direccion):
 #E:
 #S:
 #R:
-def validar_mov():
+def validar_mov(mov):
     i = 0
 
 
@@ -173,14 +180,14 @@ def verificar_captura():
 #E:
 #S:
 #R:
-def dibujar_matriz():
+def dibujar_matriz(matriz):
     i = 0
     
 
 #E:
 #S:
 #R:
-def actualizar_matriz():
+def actualizar_matriz(matriz):
     i = 0
 
 #E:
@@ -205,21 +212,22 @@ def menu_principal():
 
     titulo = tk.Label(arriba,
                       text="Laberinto",
-                      fg = "black",
-                      font=("Arial", 16)
+                      fg = "yellow",
+                      font=("Arial", 18),
+                      bg = "#87CEEB"
                       )
     titulo.pack(expand = True)
     #Botones del menu principal
 
     nueva = tk.Button(cen,
                       text="Iniciar nueva partida",
-                      command=lambda : escribir_usuario()
+                      command=lambda : escribir_usuario("iniciar")
                       )
     
     nueva.pack( expand = True)
     cargar = tk.Button(cen,
                        text="Continuar partida",
-                       command=lambda : escribir_usuario()
+                       command=lambda : escribir_usuario("cargar")
                        )
     cargar.pack( expand = True)
     consultar = tk.Button(cen,
@@ -235,64 +243,153 @@ def menu_principal():
 
 
 
-#E:
-#S:
+#E: Modo de juego para luego de obtener el texto saber a donde dirigirse
+#S: Muestra una nueva pantalla en la que el usuario debe ingresar su nombre para poder cargar la partida o empezar una nueva
 #R:
-def escribir_usuario():
+def escribir_usuario(modo):
     listaa = arriba.winfo_children()
     listaa += abajo.winfo_children()
     listaa += der.winfo_children()
     listaa += cen.winfo_children()
     for elemento in listaa:
         elemento.destroy()
+
+    global modo_juego
+    modo_juego = modo
+    #-------------------------------------
+        #Volver
+        #Primero label que pide nombre
+        #Espacio
+        #Boton
+
+    volver = tk.Button(arriba,
+                       text="Volver",
+                       command=lambda : menu_principal()
+                       )
+    volver.pack(side = "right", expand = True)
+
+    solicitud = tk.Label(cen,
+                         text="Por favor ingrese su nombre de usuario",
+                         fg = "black",
+                         font=("Arial", 12)
+                         )
+    solicitud.pack(side = "top")
         
     nombre_usuario = tk.Entry(cen)
     nombre_usuario.pack()
 
     enviar = tk.Button(cen,
                        text="Enviar",
-                       command = lambda : validar_usuario(nombre_usuario)
+                       command = lambda : accion_del_boton(nombre_usuario, modo_juego)
                        )
     enviar.pack()
-    volver = tk.Button(arriba,
-                          text="Volver",
-                          command=lambda : menu_principal()
-                          )
-        
-    volver.pack(side = "right", expand = True)
-    
-
-#E: Vacio
-#S: retorna False si no encuentra alguna coincidencia con progreso.txt y True si encuentra coincidencias. Y dependiendo del modo de juego en el que se encuentre se guarda carga la partida o se crea una nueva
-#R: Debe ser un nombre de un usuario, no vacio ni numeros
-def validar_usuario(nombre_user):
-    usuario = nombre_user.get()
-    
-    #Se compara con los elementos de progreso.txt (Por si existe) Dependiendo del modo, empieza a jugar, o crea el nuevo usuario, o le dice que hay un error
-    if usuario.strip() == "":
-        error = tk.Label(arriba,
-                         text="Error, nombre debe ser diferente de vacio o un numero",
-                         fg = "red",
-                         )
-        error.pack(expand = True)
-
-    with open("progreso.txt", "r") as nombreUsuarios:
-        usuarios = nombreUsuarios.readlines()
-        i = 0
-        while i < len(usuarios):
-            if usuario == usuarios[0]:
-                return True
-            i += 1
-        return False
-    seleccionar_nivel()
-        #O ir a cargar_partida()
-    
-
 
 #E:
 #S:
 #R:
-def seleccionar_nivel():
+def accion_del_boton(entrada, modo):
+    #Funcion creada con apoyo/guia de la ia 
+    global nombre_usuario_global  
+    nombre_usuario_global = entrada.get() #capturar el texto
+    
+
+    if modo == "iniciar":
+        validar_usuario_inicio(nombre_usuario_global)
+        
+    else:
+        print("Ir a auxiliar para saber si existe el usuario para cargar el nivel")
+
+#E: Vacio
+#S: retorna un mensaje de eror si encuentra alguna coincidencia con progreso.txt y guarda el nuevo nombre de usuario si no encuentra coincidencias. 
+#R: Debe ser un nombre de un usuario, no vacio ni numeros
+def validar_usuario_inicio(user):
+    encontrado = False
+    error = tk.Label(arriba,
+                     text="",
+                     )
+    error.pack(side = "top", expand = True)
+
+        #Se compara con los elementos de progreso.txt
+    if user.strip() == "":
+        error.config(text="Error, nombre debe ser diferente de vacio o un numero",
+                     fg = "red"
+                     )
+        return
+    try:
+        numero_ent = int(user)
+        error.configure(text="Error, nombre debe ser diferente de vacio o un numero",
+                        fg = "red"
+                        )
+        return
+    except:
+        pass
+        
+    with open("progreso.txt", "r") as nombre_usuarios:
+        todo = nombre_usuarios.readlines()
+
+    i = 0
+    while i < len(todo):
+        usuario = todo[i].strip().split(";")
+        if usuario[0].title() == user.title():
+            #print("Hay una coincidencia! Intenta otro nombre para iniciar la partida!")
+            error.configure(text = "Ese nombre de usuario ya existe! Intenta uno nuevo para iniciar la partida!",
+                         fg = "#1E90FF",
+                         font = ("Arial",11)
+                         )
+            error.pack()
+            encontrado = True
+        i += 1
+        
+    if not encontrado:
+        print("No hay coincidencias. Puedes crear el usuario!!!")
+        error.configure(text = "Creando nuevo nombre de usuario!",
+                     fg = "blue",
+                     font = ("Arial",11)
+                     )
+        error.pack()
+        crear_usuario(user)
+        seleccionar_nivel(user)
+        #Se debe de agregar al .txt de progreso y agregar validacion por si no existe progreso.txt
+        #O ir a cargar_partida()
+    
+
+#E: Recibe el nombre del usuario
+#S: Se añade el nombre de usuario a progreso.txt y se le asigna el nivel 1 por default
+#R: N/A
+def crear_usuario(nombre):
+    with open("progreso.txt", "a") as usuarios:
+        nombre_formado = [nombre + ";1\n"]
+        usuarios.writelines(nombre_formado)
+
+#E: Recibe el nombre del usuario actual que esta jugando y nivel que acaba de superar 
+#S: Reemplaza el simbolo del nivel anterior por el más reciente desbloqueado
+#R: N/A
+def actualizar_progreso(user_name, nivel):
+    #Un ciclo while para que no cambie su posicion, solo su dato a modificar
+    with open("progreso.txt", "r") as todos_usuarios:
+        jugadores = todos_usuarios.readlines()
+
+    with open("progreso.txt", "w") as todos_usuarios:
+        save_jugador = []
+        i = 0
+        while jugadores != []:
+            jugador = jugadores[i].strip().split(";")
+            if jugador[0].title() == user_name.title():
+                #jugador[1] = [";" + nivel + "\n"]
+                save_jugador += [user_name.title + ";" + nivel + "\n"]
+             
+            else:
+                save_jugador += jugador
+
+            i += 1
+            jugadores = jugadores[1:]
+        
+        todos_usuarios.writelines(save_jugador)
+
+#E:
+#S:
+#R:
+def seleccionar_nivel(jugador):
     #Debe pedir que ingrese un nombre de usuario para continuar
     #Este crea un .txt (o lo añade a uno) donde se coloca el nombre junto a algun simbolo de la cantidad de niveles superado
     #Depediendo de ese .txt desbloquea los niveles
@@ -308,64 +405,100 @@ def seleccionar_nivel():
     for elemento in listaa:
         elemento.destroy()
 
-    if validar_usuario():
-        titulo = tk.Label(arriba,
-                          text="Laberinto",
-                          fg = "black",
-                          font=("Arial", 16)
-                          )
-        titulo.pack(expand = True)
+    titulo = tk.Label(arriba,
+                      text="Laberinto",
+                      fg = "yellow",
+                      font=("Arial", 18),
+                      bg = "#87CEEB"
+                      )
+    titulo.pack(expand = True)
 
-        volver = tk.Button(arriba,
-                          text="Volver",
-                          command=lambda : menu_principal()
-                          )
+    volver = tk.Button(arriba,
+                       text="Volver",
+                       command=lambda : menu_principal()
+                       )
+    volver.pack(side = "right", expand = True)
+
+    #Llamar a una auxiliar que abra el .txt de cuantos niveles hay y imprima botones "Nivel i".
+    mostrar_niveles(jugador)
+
+
+
+#E: El nombre del usuario
+#S: Muestra los niveles disponibles 
+#R: N/A
+def mostrar_niveles(user_name):
+    #niveles_existentes.txt
+    #Crear otro .txt que diga cuales son los niveles que existen y como se llaman para que la funcion los pueda buscar y mostrar su titulo y
+        #cantidad maxima de movimeintos. Tambien el numero que los representa para asi poder saber si ese nivele sta desbloqueado apra el usuario
+#---------------------------------------
+    #Abrir niveles_existentes.txt
+    #Abrir cada nivel para obtener los datos 0 y 1 de su primera linea (Nombre y cant max mov
+    #Para colocar todos los botones y labels segun esto mismo.
+    #Se busca al usuario y se ve hasta que nivel está, si es menor que la cantidad total de botones estos se bloquean
+    
+#--------------------------------------
+    with open("niveles_existentes.txt", "r") as todos_niveles:
+        niveles = todos_niveles.readlines()
+        #Validar tambien si hay algun salto o vacio
+
+    with open("marcas.txt", "r") as marca:
+        mejores = marca.readlines()
         
-        volver.pack(side = "right", expand = True)
-
-        #Llamar a una auxiliar que abra el .txt de cuantos niveles hay y imprima botones "Nivel i".
-        mostrar_niveles()
-
+    i = 0
+    lista_botones = []
+    while i < len(niveles):
+        if i >= len(mejores):
+            mejor_marca = ["","",""]
+        else:
+            mejor_marca = mejores[i].strip().split(";")
         
-    else:
-        i = 0
-        #Ir a cargar partida
+        with open(niveles[i].strip(), "r") as info_nivel:
+            nivel_comp = info_nivel.readline()
+        primera_linea = nivel_comp.strip().split(";")
+        texto_boton = niveles[i].split(".")
+        nivel = tk.Button(der,
+                          text= texto_boton[0],
+                          command=lambda n=niveles[i]: print(n) #Luego ver más sobre esto
+                          )
+        nivel.pack(pady = 10, padx = 20, expand = True)
+        lista_botones += [nivel]
+        info = tk.Label(cen,
+                        text=primera_linea[0] + " Limite movimientos:  " + primera_linea[1] + " Mejor marca:  " + mejor_marca[1] + " por:  " + mejor_marca[2],
+                        fg = "#3E2723"
+                        )
+        info.pack(pady = 10, padx = 20, expand = True)
+        
+        i += 1
+
+    #user_name
+    nivel_desblo = "1"
+    with open("progreso.txt", "r") as progreso:
+        info_user = progreso.readlines()
+        for elemento in info_user:
+            separar = elemento.strip().split(";")
+            if separar[0].title() == user_name.title():
+                nivel_desblo = separar[1]
+        
+    i = 0
+    #nivel_desblo
+    while i < len(niveles):
+        nivel_actual = i+1
+        if nivel_actual <= int(nivel_desblo):
+            lista_botones[i].configure(state = "normal",
+                                       bg = "#DC143C",
+                                       fg = "#FFFFFF")
+        else:
+            lista_botones[i].configure(state = "disabled",
+                                       bg = "#708090",
+                                       fg = "#FFFFFF"
+                                       )
+            
+        i += 1
 
 
-#E:
-#S:
-#R:
-def mostrar_niveles():
-    nivel1 = tk.Button(der,
-                       text="Nivel 1",
-                       command=lambda : print("Nivel 1")
-                       )
-    nivel1.pack(expand = True)
-    info1 = tk.Label(cen,
-                     text="Bodega abandonada. Limite movimientos: 45. Mejor marca: 36",
-                     )
-    info1.pack(expand = True)
-    nivel2 = tk.Button(der,
-                       text="Nivel 2",
-                       command=lambda : print("Nivel 2")
-                       )
-    nivel2.pack(expand = True)
-    info2 = tk.Label(cen,
-                     text="Playa de dia. Limite movimientos: 38. Mejor marca: 26",
-                     )
-    info2.pack(expand = True)
-    nivel2.config(state = "disabled")
+    
 
-    nivel3 = tk.Button(der,
-                       text="Nivel 3",
-                       command=lambda : print("Nivel 3")
-                       )
-    nivel3.pack(expand = True)
-    info3 = tk.Label(cen,
-                     text="Desierto. Limite movimientos: 50. Mejor marca: 42",
-                     )
-    info3.pack(expand = True)
-    nivel3.config(state = "disabled")
 
 
 #E: Vacio
@@ -395,7 +528,7 @@ def mejores_marcas():
 
     titulo = tk.Label(arriba,
                       text="Mejores marcas",
-                      fg = "black",
+                      fg = "#3E2723",
                       font=("Arial", 16)
                       )
     titulo.pack(expand = True)
@@ -422,7 +555,7 @@ ventana.resizable(False, False)
 
 #------------- Frames para acomodar los labels de forma más facil y ordenada -------
 arriba = tk.Frame(ventana,
-                  bg = "gray",
+                  bg = "#87CEEB",
                   width= 200,
                   height=100,
                   )
@@ -430,7 +563,7 @@ arriba.pack_propagate(False)
 arriba.pack(side="top", fill = "x")
 
 abajo = tk.Frame(ventana,
-                  bg = "gray",
+                  bg = "#A0522D",
                   width= 200,
                   height=100,
                   )
@@ -438,7 +571,7 @@ abajo.pack_propagate(False)
 abajo.pack(side="bottom", fill = "x")
 
 der = tk.Frame(ventana,
-                  bg = "orange",
+                  bg = "#DEB887",
                   width= 200,
                   height=100,
                   )
@@ -448,7 +581,7 @@ der.pack(side="right", fill= "y")
 
 
 cen = tk.Frame(ventana,
-                  bg = "yellow",
+                  bg = "#F4A460",
                   width= 200,
                   height=100,
                   )
