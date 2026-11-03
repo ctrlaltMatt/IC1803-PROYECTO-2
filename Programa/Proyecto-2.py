@@ -16,6 +16,7 @@ nombre_usuario_global = ""
 #S: Retorna una matriz interna que sera en la que se modificara todo
 #R: Debe tener una matriz valida para poder ejecutarse 
 def cargar_nivel(nombre_archi):
+    global matriz
     with open(nombre_archi, "r") as archivo_nivel:
         nivel = archivo_nivel.readline()
         separar = nivel.split(";")
@@ -40,6 +41,7 @@ def cargar_nivel(nombre_archi):
     if validar_matriz(matriz):
         print("Matriz valida") #Luego eliminar esto
     print(matriz)
+    dibujar_matriz(matriz)
     
 
 
@@ -47,6 +49,7 @@ def cargar_nivel(nombre_archi):
 #S: Retorna True si todo esta completo y False si falta algun elemento 
 #R: N/A
 def validar_matriz(m):
+    global matriz 
     if not isinstance(m, list) or m == []:
         return False
     #Para validar que sea rectangular 
@@ -86,7 +89,7 @@ def validar_matriz(m):
 
     if not validar_llaves(puerta_llave):
         return False
-
+    
     return True
 
 
@@ -177,11 +180,70 @@ def verificar_captura():
     i = 0
 
 
-#E:
-#S:
-#R:
+#E: Recibe la matriz ya lista
+#S: Muestra una lista de labels donde cada uno contiene 1 caracter representante de la matriz
+#R: N/A
 def dibujar_matriz(matriz):
+    listaa = arriba.winfo_children()
+    listaa += abajo.winfo_children()
+    listaa += der.winfo_children()
+    listaa += cen.winfo_children()
+    for elemento in listaa:
+        elemento.destroy()
+
+    titulo = tk.Label(arriba,
+                      text="Laberinto",
+                      fg = "#FFD700",
+                      font=("Arial", 18),
+                      bg = "#87CEEB"
+                      )
+    titulo.pack(expand = True)
+    volver = tk.Button(arriba,
+                       text="Volver",
+                       command=lambda : menu_principal()
+                       )
+    volver.pack(side = "right", expand = True)
+    
+        
     i = 0
+    lista_labels = []
+    while i < len(matriz):
+        j = 0
+        while j < len(matriz[0]):
+            if matriz[i][j] == "#":
+                color = "#708090"
+            elif matriz[i][j] == "J":
+                color = "#1E90FF"
+            elif matriz[i][j] == "S":
+                color = "#2E8B57"
+            elif matriz[i][j] == "*":
+                color = "#FFD700"
+            elif matriz[i][j] == ".":
+                color = "#EEDD82"
+            else:
+                color = "#DC143C"
+                #Arena
+            #Dependiendo de lo que hay en la posicion el fg o bg es diferente
+            celda = tk.Label(cen,
+                             text= matriz[i][j],
+                             fg = color,
+                             bg = "#FFE4C4",
+                             width=5,  #Para que sea cuadrada
+                             height=2,
+                             font = ("Arial",11)
+                             )
+            celda.grid(row=i, column=j, padx=2, pady=2)
+            lista_labels += [celda]
+            
+            j += 1
+        i += 1
+        #cargar_nivel(nombre_archi)
+        #nivel = tk.Button(der,
+         #                 text= texto_boton[0],
+         #                 command=lambda n=niveles[i]: print(n) #Luego ver más sobre esto
+         #                 )
+        #nivel.pack(pady = 10, padx = 20, expand = True)
+    
     
 
 #E:
@@ -189,6 +251,7 @@ def dibujar_matriz(matriz):
 #R:
 def actualizar_matriz(matriz):
     i = 0
+    #cargar_nivel(nombre_archi)
 
 #E:
 #S:
@@ -212,7 +275,7 @@ def menu_principal():
 
     titulo = tk.Label(arriba,
                       text="Laberinto",
-                      fg = "yellow",
+                      fg = "#FFD700",
                       font=("Arial", 18),
                       bg = "#87CEEB"
                       )
@@ -245,7 +308,7 @@ def menu_principal():
 
 #E: Modo de juego para luego de obtener el texto saber a donde dirigirse
 #S: Muestra una nueva pantalla en la que el usuario debe ingresar su nombre para poder cargar la partida o empezar una nueva
-#R:
+#R: N/A
 def escribir_usuario(modo):
     listaa = arriba.winfo_children()
     listaa += abajo.winfo_children()
@@ -284,9 +347,9 @@ def escribir_usuario(modo):
                        )
     enviar.pack()
 
-#E:
-#S:
-#R:
+#E: Recibe el nombre de la variable utilizada en el entry para poder hacer la funcion get() y el modo de juego en el que se encuentra actualmente
+#S: Una vez se toma el valor que el usuario ingreso se lleva a una validacion dependiendo de su modo de juego
+#R: N/A
 def accion_del_boton(entrada, modo):
     #Funcion creada con apoyo/guia de la ia 
     global nombre_usuario_global  
@@ -295,10 +358,10 @@ def accion_del_boton(entrada, modo):
 
     if modo == "iniciar":
         validar_usuario_inicio(nombre_usuario_global)
-        
-    else:
-        print("Ir a auxiliar para saber si existe el usuario para cargar el nivel")
 
+    else:
+        validar_usuario_cargar(nombre_usuario_global)
+        
 #E: Vacio
 #S: retorna un mensaje de eror si encuentra alguna coincidencia con progreso.txt y guarda el nuevo nombre de usuario si no encuentra coincidencias. 
 #R: Debe ser un nombre de un usuario, no vacio ni numeros
@@ -351,6 +414,55 @@ def validar_usuario_inicio(user):
         seleccionar_nivel(user)
         #Se debe de agregar al .txt de progreso y agregar validacion por si no existe progreso.txt
         #O ir a cargar_partida()
+#E: Vacio
+#S: retorna un mensaje de eror si no encuentra alguna coincidencia con progreso.txt
+#R: Debe ser un nombre de un usuario, no vacio ni numeros
+def validar_usuario_cargar(user):
+    encontrado = False
+    error = tk.Label(arriba,
+                     text="",
+                     )
+    error.pack(side = "top", expand = True)
+
+        #Se compara con los elementos de progreso.txt
+    if user.strip() == "":
+        error.config(text="Error, nombre debe ser diferente de vacio o un numero",
+                     fg = "red"
+                     )
+        return
+    try:
+        numero_ent = int(user)
+        error.configure(text="Error, nombre debe ser diferente de vacio o un numero",
+                        fg = "red"
+                        )
+        return
+    except:
+        pass
+        
+    with open("progreso.txt", "r") as nombre_usuarios:
+        todo = nombre_usuarios.readlines()
+
+    i = 0
+    while i < len(todo):
+        usuario = todo[i].strip().split(";")
+        if usuario[0].title() == user.title():
+            error.configure(text = "Nombre de usuario valido! Cargando la partida!",
+                         fg = "#1E90FF",
+                         font = ("Arial",11)
+                         )
+            error.pack()
+            encontrado = True
+        i += 1
+        
+    if encontrado:
+        print("Hay coincidencias.Cargando su partida!!")
+        error.configure(text = "Cargando su partida!",
+                     fg = "blue",
+                     font = ("Arial",11)
+                     )
+        error.pack()
+        seleccionar_nivel(user)
+        #O ir a cargar_partida()
     
 
 #E: Recibe el nombre del usuario
@@ -386,9 +498,22 @@ def actualizar_progreso(user_name, nivel):
         
         todos_usuarios.writelines(save_jugador)
 
+
+
+#-------------------------------------------------------
 #E:
 #S:
 #R:
+def mostrar_panel_info(nombre_nivel, mov_restantes, mov_max, objetos_recogidos, objetos_total, llaves, puertas):
+    i = 0
+#-------------------------------------------------------
+
+
+
+
+#E: Recibe el nombre del jugador actual ya que sera necesario para una futura funcion
+#S: Limpia los frames y muestra el titulo del juego junto al boton para regresar al menu inicial y al final va a la funcion de mostrar niveles
+#R: N/A
 def seleccionar_nivel(jugador):
     #Debe pedir que ingrese un nombre de usuario para continuar
     #Este crea un .txt (o lo añade a uno) donde se coloca el nombre junto a algun simbolo de la cantidad de niveles superado
@@ -407,7 +532,7 @@ def seleccionar_nivel(jugador):
 
     titulo = tk.Label(arriba,
                       text="Laberinto",
-                      fg = "yellow",
+                      fg = "#FFD700",
                       font=("Arial", 18),
                       bg = "#87CEEB"
                       )
@@ -459,9 +584,16 @@ def mostrar_niveles(user_name):
         texto_boton = niveles[i].split(".")
         nivel = tk.Button(der,
                           text= texto_boton[0],
-                          command=lambda n=niveles[i]: print(n) #Luego ver más sobre esto
+                          command=lambda n=niveles[i]: cargar_nivel(n.strip()) #Luego ver más sobre esto
                           )
         nivel.pack(pady = 10, padx = 20, expand = True)
+        #cargar_nivel(nombre_archi)
+        #nivel = tk.Button(der,
+         #                 text= texto_boton[0],
+         #                 command=lambda n=niveles[i]: print(n) #Luego ver más sobre esto
+         #                 )
+        #nivel.pack(pady = 10, padx = 20, expand = True)
+        
         lista_botones += [nivel]
         info = tk.Label(cen,
                         text=primera_linea[0] + " Limite movimientos:  " + primera_linea[1] + " Mejor marca:  " + mejor_marca[1] + " por:  " + mejor_marca[2],

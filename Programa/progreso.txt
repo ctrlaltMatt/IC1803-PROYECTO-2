@@ -10,3 +10,10 @@ Maia;1
 Mario;1
 Maitane;1
 Mahalia;1
+Wild;1
+Wile;1
+Cris;1
+Judith;1
+Mateo;1
+Kat;1
+katt;1
