@@ -11,11 +11,11 @@ nombre_nivel = ""
 matriz = []
 modo_juego = ""
 nombre_usuario_global = ""
-llaves_nivel = ""
-puertas_nivel = ""
+llaves_nivel = []
+puertas_nivel = []
 cant_max_mov = 0
-mov_restantes = 0
 cant_max_mov = 0
+mov_restantes = cant_max_mov #Se le va a ir restando con cada movimiento valido
 objetos = False #Luego se le cambia a un numero enterto
 
 #E: Recibe el nombre de archivo del nivel que se selecciono por el usuario
@@ -49,6 +49,7 @@ def cargar_nivel(nombre_archi):
     print(matriz)
     dibujar_matriz(matriz)
     info_matriz(nombre_archi)
+    
     
 
 
@@ -110,16 +111,21 @@ def validar_llaves(puerta_llave):
     llaves_encont = []
     puertas_encont = []
     global llaves_nivel 
-    global puertas_nivel 
+    global puertas_nivel
+    puertas_nivel = []
+    llaves_nivel = []
     
     k = 0
     #Primero separa llaves de puertas
     while k < len(puertas) and puerta_llave != []:
         if puerta_llave[0] == puertas[k]:
             num = str(k + 1)
+            puertas_nivel += [puerta_llave[0]] #
             puertas_encont += [num]
             k = 0
             puerta_llave = puerta_llave[1:]
+             
+
 
         elif puerta_llave[0] == llaves[k]:
             llaves_encont += [puerta_llave[0]]
@@ -140,7 +146,6 @@ def validar_llaves(puerta_llave):
             if cmp == dato:
                 i -= 1
                 llaves_nivel += dato
-                puertas_nivel += dato 
                 puertas_encont = puertas_encont[1:]
                 llaves_encont = llaves_encont[1:]
                 
@@ -153,18 +158,17 @@ def validar_llaves(puerta_llave):
     return True 
 
 
-
+#E: Recibe el movimiento que el jugador desea realizar. La direccion del mismo
+#S: 
+#R:
+def validar_mov(mov):
+    i = 0
+    #
 
 #E:
 #S:
 #R:
 def mover_jugador(matriz, direccion):
-    i = 0
-
-#E:
-#S:
-#R:
-def validar_mov(mov):
     i = 0
 
 
@@ -204,6 +208,7 @@ def dibujar_matriz(matriz):
     for elemento in listaa:
         elemento.destroy()
 
+
     titulo = tk.Label(arriba,
                       text="Laberinto",
                       fg = "#B8860B",
@@ -213,19 +218,24 @@ def dibujar_matriz(matriz):
     titulo.pack(expand = True)
         
     i = 0
-    lista_labels = []
+    #
+    lista_labels = []   #
     while i < len(matriz):
         j = 0
         while j < len(matriz[0]):
             color_bg = "#FFE4C4"
             if matriz[i][j] == "#":
-                color = "#708090"
+                color_bg = "#2E8B57"
+                color = "#FFE4C4"
+                if i == 0 or i == len(matriz)-1 or j == 0 or j == len(matriz[0])-1:
+                    color_bg = "#8B5A2B"
+                    color = "#FFE4C4"
+                #   #2E8B57
                 #      "#555555" Gris #Verificar y probar colores. Quiero un tono cafe para los bloqueos. 
-                color_bg = "#8B5A2B"
             elif matriz[i][j] == "J":
                 color = "#1E90FF"
             elif matriz[i][j] == "S":
-                color = "#2E8B57"
+                color = "#32CD32"
             elif matriz[i][j] == "*":
                 color = "#FFD700"
             elif matriz[i][j] == ".":
@@ -313,6 +323,8 @@ def info_matriz(nombre_nivel):
                           )
     cont_mov.pack(expand = True)
 
+         #-------------------- Arreglar --------------------#
+
     llaves_msj = tk.Label(der,
                           text= "Llaves en el nivel: ",
                           fg = "#FFFACD",
@@ -347,7 +359,7 @@ def info_matriz(nombre_nivel):
         # (Ej: de si estaba en nivel 2 y luego va a nivel 1. Se quedan aqui las puertas y llaves de nivel 2 y se juntan con las de 1
 
 
-    #-------------------- Arreglar --------------------#
+   
 
     objetos_dis = tk.Label(der,
                         text= "Objetos disponibles en el nivel: " + str(objetos),
