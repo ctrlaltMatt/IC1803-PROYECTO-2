@@ -17,19 +17,23 @@ cant_max_mov = 0
 cant_max_mov = 0
 mov_restantes = cant_max_mov #Se le va a ir restando con cada movimiento valido
 objetos = False #Luego se le cambia a un numero enterto
+matriz_labels = []
+
 
 #E: Recibe el nombre de archivo del nivel que se selecciono por el usuario
 #S: Retorna una matriz interna que sera en la que se modificara todo
 #R: Debe tener una matriz valida para poder ejecutarse 
 def cargar_nivel(nombre_archi):
     global matriz
+    global mov_restantes
     with open(nombre_archi, "r") as archivo_nivel:
         nivel = archivo_nivel.readline()
         separar = nivel.split(";")
         nombre_nivel = separar[0].strip()
         cant_max_mov = int(separar[1].strip()) #Para que sea un numero que se pueda restar
         if cant_max_mov <= 0:
-            return False 
+            return False
+        mov_restantes = cant_max_mov
 
         
         dato = archivo_nivel.readline().strip()
@@ -46,9 +50,14 @@ def cargar_nivel(nombre_archi):
         #validarla, bordes con #, solo un J y un S y al menos un *
     if validar_matriz(matriz):
         print("Matriz valida") #Luego eliminar esto
-    print(matriz)
-    dibujar_matriz(matriz)
-    info_matriz(nombre_archi)
+        dibujar_matriz(matriz)
+        info_matriz(nombre_archi)
+        print(matriz)
+    else:
+        print("Matriz ingresada para dicho nivel es invalida, error")
+        print(matriz)
+    
+    
     
     
 
@@ -158,18 +167,133 @@ def validar_llaves(puerta_llave):
     return True 
 
 
-#E: Recibe el movimiento que el jugador desea realizar. La direccion del mismo
-#S: 
+#E: Recibe el nombre simbolico de la tecla que presionó el usuario
+#S: Se dirige a validar dicho mivimiento que se intenta hacer
 #R:
-def validar_mov(mov):
-    i = 0
-    #
+def validar_mov(event):
+    listaa = abajo.winfo_children()
+    for elemento in listaa:
+        elemento.destroy()
+        
+    global matriz
+    global mov_restantes
+    
+    fila = 0
+    colum = 0
+    nueva_fila = 0
+    nueva_colum = 0
+    
+    texto_jug = tk.Label(abajo,
+                         text= "Mover arriba: [ ↑ ]   Mover abajo: [ ↓ ]   Mover izquierda: Tecla [ ← ]   Mover derecha: Tecla [ → ]",
+                         fg = "#FFD700",
+                         bg = "#8B4513",
+                         font = ("Arial",11)
+                         )
+    texto_jug.pack(expand = True)
+    
+    error = tk.Label(abajo,
+                     text= "",
+                     fg = "#FFD700",
+                     font = ("Arial",11)
+                     )
+    error.pack(expand = True)
+    
+    for i, fila_matriz in enumerate(matriz):
+        for j, celda in enumerate(fila_matriz):
+            if celda == "J":
+                fila = i
+                colum = j
+    
+    #Para crear esta función si se busco en internet y se apoyo de la ia utilizandola como guia/tutor
+    if event.keysym == "Up":
+        nueva_fila = fila -1
+        direccion = matriz[nueva_fila][colum]
+        #No puede atravesar ni paredes ni puertas cerradas si aun no tiene su llave
+        if direccion == "#":
+            error.configure(text = "Movimiento invalido!, intentelo de nuevo",
+                            bg = "#8B4513"
+                            )
+        else:
+            error.configure(text = "",
+                            bg = "#A0522D"
+                            )
+            mov_restantes -= 1
+            matriz[fila][colum] = "."
+            matriz[nueva_fila][colum] = "J"
+            mover_jugador(matriz, fila, colum, nueva_fila, colum)
+        
+    elif event.keysym == "Down":
+        nueva_fila = fila +1
+        direccion = matriz[nueva_fila][colum]
+        if direccion == "#":
+            error.configure(text = "Movimiento invalido!, intentelo de nuevo",
+                            bg = "#8B4513"
+                            )
+        else:
+            error.configure(text = "",
+                            bg = "#A0522D"
+                            )
+            mov_restantes -= 1
+            matriz[fila][colum] = "."
+            matriz[nueva_fila][colum] = "J"
+            mover_jugador(matriz, fila, colum, nueva_fila, colum)
+        
+            
+    elif event.keysym == "Left":
+        nueva_colum = colum - 1
+        direccion = matriz[fila][nueva_colum]
+        if direccion == "#":
+            error.configure(text = "Movimiento invalido!, intentelo de nuevo",
+                            bg = "#8B4513"
+                            )
+        else:
+            error.configure(text = "",
+                            bg = "#A0522D"
+                            )
+            mov_restantes -= 1
+            matriz[fila][colum] = "."
+            matriz[fila][nueva_colum] = "J"
+            mover_jugador(matriz, fila, colum, fila, nueva_colum)
+        
+    elif event.keysym == "Right":
+        nueva_colum = colum + 1
+        direccion = matriz[fila][nueva_colum]
+        if direccion == "#":
+            error.configure(text = "Movimiento invalido!, intentelo de nuevo",
+                            bg = "#8B4513"
+                            )
+        else:
+            error.configure(text = "",
+                            bg = "#A0522D"
+                            )
+            mov_restantes -= 1
+            matriz[fila][colum] = "."
+            matriz[fila][nueva_colum] = "J"
+            mover_jugador(matriz, fila, colum, fila, nueva_colum)
+        
 
-#E:
-#S:
-#R:
-def mover_jugador(matriz, direccion):
-    i = 0
+#E: Recibe la matriz del juego y las posiciones tanto actual del jugador, como de su destino
+#S: La matriz de labels actualizada con la nueva posicion del jugador
+#R: N/A
+def mover_jugador(matriz, fila, colum, nueva_fila, nueva_colum):
+    if mov_restantes <= 0:
+        pantalla_derrota("no_mov")
+        
+    else:
+        global matriz_labels
+        matriz_labels[fila][colum].configure(text= ".",
+                                             fg = "#EEDD82"
+                                             )
+        matriz_labels[nueva_fila][nueva_colum].configure(text= "J",
+                                             fg = "#1E90FF"
+                                             )
+        #mov_restantes
+        listaa = der.winfo_children()
+        for elemento in listaa:
+            if elemento == cont_mov:
+                cont_mov.configure(text= "Movimientos restante: " + str(mov_restantes))
+                cont_mov.pack(expand = True)
+      
 
 
 #E:
@@ -177,6 +301,8 @@ def mover_jugador(matriz, direccion):
 #R:
 def mover_guardias(matriz):
     i = 0
+    #Tanto patrullas como vigilantes
+    #Verificar captura, ver si ya capturo al jugador y eso lleva a derrota
 
 #E:
 #S:
@@ -194,6 +320,70 @@ def vigilante():
 #S:
 #R:
 def verificar_captura():
+    i = 0
+
+#E: Recibe el motivo de la derrota (Captura por patrulleros o falta de movimientos
+#S: Muestra en la pantalla un mensaje de que perdio el juego y le da la opcion de ir al menu principal o volver a seleccionar el nivel
+#R:
+def pantalla_derrota(motivo):
+    listaa = arriba.winfo_children()
+    listaa += abajo.winfo_children()
+    listaa += der.winfo_children()
+    listaa += cen.winfo_children()
+    for elemento in listaa:
+        elemento.destroy()
+
+    global nombre_usuario_global
+
+    titulo = tk.Label(arriba,
+                      text="Derrota en el laberinto!",
+                      fg = "#DC143C",
+                      font=("Arial", 19),
+                      bg = "#87CEEB"
+                      )
+    titulo.pack(expand = True)
+
+    if motivo == "no_mov":
+        msj_perdio = tk.Label(cen,
+                          text="Derrota! Te has quedado sin más movimientos",
+                          fg = "#DC143C", #Color rojo tal vez 
+                          font=("Arial", 12),
+                          bg = "#F4A460"
+                          )
+        msj_perdio.pack(expand = True)
+    else: #Vacio "" o "patrullero"/"vigilante"
+        msj_perdio = tk.Label(cen,
+                          text="Derrota! Fuiste capturado por los guardias",
+                          fg = "#DC143C", #Color rojo tal vez 
+                          font=("Arial", 12),
+                          bg = "#F4A460"
+                          )
+        msj_perdio.pack(expand = True)
+
+    volver = tk.Button(cen,
+                       text="Volver a selección de nivel",
+                       command=lambda : seleccionar_nivel(nombre_usuario_global)
+                       )
+    volver.pack(expand = True)
+
+    regresar = tk.Button(cen,
+                         text="Regresar al menu principal",
+                         command=lambda : menu_principal()
+                         )
+    regresar.pack(expand = True)
+
+    cerrar = tk.Button(cen,
+                       text="Cerrar programa",
+                       command =ventana.destroy
+                       )
+    cerrar.pack(expand = True)
+  
+
+#E:
+#S:
+#R:
+def pantalla_victoria():
+    #No solo debe llegar al final, sino haber obtenido los objetos del nivel
     i = 0
 
 
@@ -219,8 +409,10 @@ def dibujar_matriz(matriz):
         
     i = 0
     #
-    lista_labels = []   #
+    global matriz_labels
+    matriz_labels = []
     while i < len(matriz):
+        lista_labels = []
         j = 0
         while j < len(matriz[0]):
             color_bg = "#FFE4C4"
@@ -256,6 +448,7 @@ def dibujar_matriz(matriz):
             lista_labels += [celda]
             
             j += 1
+        matriz_labels += [lista_labels]
         i += 1
         #cargar_nivel(nombre_archi)
         #nivel = tk.Button(der,
@@ -282,6 +475,7 @@ def info_matriz(nombre_nivel):
     global llaves_nivel 
     global puertas_nivel  
     global objetos
+    global cont_mov 
 
     volver = tk.Button(arriba,
                        text="Volver",
@@ -315,8 +509,9 @@ def info_matriz(nombre_nivel):
     nivel_max_mov.pack(expand = True)
 
         #-------------------- Arreglar --------------------#
+    #cont_mov = tk.Label(der)
 
-    cont_mov = tk.Label(der,#Arreglar esto porque dice Mov res: 0 
+    cont_mov = tk.Label(der,#Arreglar esto porque siempre dice la misma cant 
                           text= "Movimientos restante: " + str(mov_restantes),
                           fg = "#FFFACD",
                           bg = "#A0522D"
@@ -375,9 +570,6 @@ def info_matriz(nombre_nivel):
                          font = ("Arial",11)
                          )
     texto_jug.pack(expand = True)
-
-    
-
 
     
     #Frame der
@@ -875,6 +1067,11 @@ cen.pack(side = "left", expand=True, fill= "both")
 
 
 menu_principal()
+ventana.bind("<Up>", validar_mov)
+ventana.bind("<Down>", validar_mov)
+ventana.bind("<Left>", validar_mov)
+ventana.bind("<Right>", validar_mov)
+
 ventana.mainloop()
 
 
