@@ -1,12 +1,6 @@
 #Segundo proyecto de taller de programacion. Laberinto
 import tkinter as tk
 
-global nombre_nivel #Str
-global cant_max_mov #Int
-global matriz #List
-global modo_juego #str
-global usuario #str
-global nombre_usuario_global #str
 nombre_nivel = ""
 matriz = []
 modo_juego = ""
@@ -14,12 +8,10 @@ nombre_usuario_global = ""
 llaves_nivel = []
 puertas_nivel = []
 cant_max_mov = 0
-cant_max_mov = 0
 mov_restantes = cant_max_mov #Se le va a ir restando con cada movimiento valido
 objetos = False #Luego se le cambia a un numero enterto
 matriz_labels = []
 patrulleros = []
-
 
 #E: Recibe el nombre de archivo del nivel que se selecciono por el usuario
 #S: Retorna una matriz interna que sera en la que se modificara todo
@@ -48,6 +40,7 @@ def cargar_nivel(nombre_archi):
             matriz += [fila]
             dato = archivo_nivel.readline().strip()
 
+    limpiar_variables_globales()
         #validarla, bordes con #, solo un J y un S y al menos un *
     if validar_matriz(matriz):
         print("Matriz valida") #Luego eliminar esto
@@ -59,8 +52,25 @@ def cargar_nivel(nombre_archi):
         print(matriz)
     
     
-    
-    
+
+#E: Vacio
+#S: Limpia las variables globales que posteriormente se utilizarán para
+        #no afectar si el usuario cambia entre niveles mientras juega
+#R: N/A
+def limpiar_variables_globales():
+    global modo_juego
+    global llaves_nivel
+    global puertas_nivel
+    global objetos
+    global matriz_labels
+    global patrulleros
+    modo_juego = ""
+    llaves_nivel = []
+    puertas_nivel = []
+    objetos = False
+    matriz_labels = []
+    patrulleros = []
+        
 
 
 #E: recibe la matriz creada previamente y valida que exista todo lo necesario
@@ -79,6 +89,7 @@ def validar_matriz(m):
     salida = 0 #Solo debe haber 1
     global objetos
     puerta_llave = []
+    global patrulleros
     
     i = 0
     while i < len(m):
@@ -90,16 +101,16 @@ def validar_matriz(m):
 
             #patrulleros = [i, j, "direccion" {d,izq,ae,ab}]
             if m[i][j] == "<":
-                patrulleros = patrulleros + [i, j, "d"]
+                patrulleros = patrulleros + [[i, j, "d"]]
                 
             if m[i][j] == ">":
-                patrulleros = patrulleros + [i, j, "izq"]
+                patrulleros = patrulleros + [[i, j, "izq"]]
                 
             if m[i][j] == "^":
-                patrulleros = patrulleros + [i, j, "ar"]
+                patrulleros = patrulleros + [[i, j, "ar"]]
                 
             if m[i][j] == "v":
-                patrulleros = patrulleros + [i, j, "ab"]
+                patrulleros = patrulleros + [[i, j, "ab"]]
                 
             if m[i][j] == "J":
                 jugador += 1
@@ -319,17 +330,126 @@ def mover_jugador(matriz, fila, colum, nueva_fila, nueva_colum):
 #S:
 #R:
 def mover_guardias(matriz):
-    #patrulleros = [i, j, "direccion" {d,izq,ae,ab}]
+    #patrulleros = [i, j, "direccion"] {d,izq,ar,ab}
     global patrulleros
-    i = 0
+
+    global matriz_labels
+
+    if patrulleros == []:
+        return
+    for patrulla in patrulleros:
+        if patrulla[2] == "d":
+            i = patrulla[0]
+            j = patrulla[1]
+            #Si es diferente de un espacio vacio no puede avanzar
+            if matriz[i][j+1] == "J" or matriz[i][j] == "J":
+                return pantalla_derrota("patrullero")
+
+            elif matriz[i][j+1] == ".":
+                #> -- <
+                matriz[i][j] = "."
+                matriz[i][j+1] = ">"
+                #Actualizar tanto la matriz como los labels
+                matriz_labels[i][j].configure(text= matriz[i][j],
+                                              fg = "#EEDD82"
+                                              )
+                matriz_labels[i][j+1].configure(text= matriz[i][j+1],
+                                                fg = "#DC143C"
+                                                )
+                patrulla[1] = j+1
+                
+            else:
+                patrulla[2] = "izq"
+                matriz[i][j] = "<"
+                matriz_labels[i][j].configure(text= matriz[i][j],
+                                              fg = "#DC143C"
+                                              )
+                
+                #Si no hay camino significa que es pared o algo estorba. Entonces darse la vuelta y quedarse ahi un turno.
+                
+    
+            
+        elif patrulla[2] == "izq":
+            i = patrulla[0]
+            j = patrulla[1]
+            if matriz[i][j-1] == "J" or matriz[i][j] == "J":
+                return pantalla_derrota("patrullero")
+            
+            elif matriz[i][j-1] == ".":
+                #< -- >
+                matriz[i][j] = "."
+                matriz[i][j-1] = "<"
+                matriz_labels[i][j].configure(text= matriz[i][j],
+                                              fg = "#EEDD82"
+                                              )
+                matriz_labels[i][j-1].configure(text= matriz[i][j-1],
+                                                fg = "#DC143C"
+                                                )
+                patrulla[1] = j-1
+                
+                
+            else:
+                patrulla[2] = "d"
+                matriz[i][j] = ">"
+                matriz_labels[i][j].configure(text= matriz[i][j],
+                                              fg = "#DC143C"
+                                              )
+                
+                
+        elif patrulla[2] == "ar":
+            i = patrulla[0]
+            j = patrulla[1]
+            if matriz[i-1][j] == "J" or matriz[i][j] == "J":
+                return pantalla_derrota("patrullero")
+            
+            elif matriz[i-1][j] == ".":
+                #^ -- v
+                matriz[i][j] = "."
+                matriz[i-1][j] = "^"
+                matriz_labels[i][j].configure(text= matriz[i][j],
+                                              fg = "#EEDD82"
+                                              )
+                matriz_labels[i-1][j].configure(text= matriz[i-1][j],
+                                                fg = "#DC143C"
+                                                )
+                patrulla[0] = i-1
+                
+                
+            else:
+                patrulla[2] = "ab"
+                matriz[i][j] = "v"
+                matriz_labels[i][j].configure(text= matriz[i][j],
+                                              fg = "#DC143C"
+                                              )
+                
+                
+        elif patrulla[2] == "ab":
+            i = patrulla[0]
+            j = patrulla[1]
+            if matriz[i+1][j] == "J" or matriz[i][j] == "J":
+                return pantalla_derrota("patrullero")
+            
+            elif matriz[i+1][j] == ".":
+                #v -- ^
+                matriz[i][j] = "."
+                matriz[i+1][j] = "v"
+                matriz_labels[i][j].configure(text= matriz[i][j],
+                                              fg = "#EEDD82"
+                                              )
+                matriz_labels[i+1][j].configure(text= matriz[i+1][j],
+                                                fg = "#DC143C"
+                                                )
+                patrulla[0] = i+1
+                
+            else:
+                patrulla[2] = "ar"
+                matriz[i][j] = "^"
+                matriz_labels[i][j].configure(text= matriz[i][j],
+                                              fg = "#DC143C"
+                                              )
     #Tanto patrullas como vigilantes
     #Verificar captura, ver si ya capturo al jugador y eso lleva a derrota
-
-#E:
-#S:
-#R:
-def patrullas():
-    i = 0
+            
 
 #E:
 #S:
@@ -404,6 +524,8 @@ def pantalla_derrota(motivo):
 #S:
 #R:
 def pantalla_victoria():
+    global objetos
+    #Primero es false si no hay ninguno. Luego cambia a la cantidad que haya
     #No solo debe llegar al final, sino haber obtenido los objetos del nivel
     i = 0
 
@@ -418,6 +540,7 @@ def dibujar_matriz(matriz):
     listaa += cen.winfo_children()
     for elemento in listaa:
         elemento.destroy()
+
 
 
     titulo = tk.Label(arriba,
