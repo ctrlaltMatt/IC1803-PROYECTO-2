@@ -203,6 +203,7 @@ def validar_mov(event):
         
     global matriz
     global mov_restantes
+    global objetos
     
     fila = 0
     colum = 0
@@ -239,6 +240,17 @@ def validar_mov(event):
             error.configure(text = "Movimiento invalido!, intentelo de nuevo",
                             bg = "#8B4513"
                             )
+        elif direccion == "S":
+            verificar_victoria()
+
+        elif direccion == "*":
+            objetos -= 1
+            mov_restantes -= 1
+            matriz[fila][colum] = "."
+            matriz[nueva_fila][colum] = "J"
+            mover_jugador(matriz, fila, colum, nueva_fila, colum)
+            mover_guardias(matriz)
+            
         else:
             error.configure(text = "",
                             bg = "#A0522D"
@@ -256,6 +268,17 @@ def validar_mov(event):
             error.configure(text = "Movimiento invalido!, intentelo de nuevo",
                             bg = "#8B4513"
                             )
+        elif direccion == "S":
+            verificar_victoria()
+            
+        elif direccion == "*":
+            objetos -= 1
+            mov_restantes -= 1
+            matriz[fila][colum] = "."
+            matriz[nueva_fila][colum] = "J"
+            mover_jugador(matriz, fila, colum, nueva_fila, colum)
+            mover_guardias(matriz)
+            
         else:
             error.configure(text = "",
                             bg = "#A0522D"
@@ -274,6 +297,17 @@ def validar_mov(event):
             error.configure(text = "Movimiento invalido!, intentelo de nuevo",
                             bg = "#8B4513"
                             )
+        elif direccion == "S":
+            verificar_victoria()
+
+        elif direccion == "*":
+            objetos -= 1
+            mov_restantes -= 1
+            matriz[fila][colum] = "."
+            matriz[nueva_fila][colum] = "J"
+            mover_jugador(matriz, fila, colum, nueva_fila, colum)
+            mover_guardias(matriz)
+            
         else:
             error.configure(text = "",
                             bg = "#A0522D"
@@ -291,6 +325,17 @@ def validar_mov(event):
             error.configure(text = "Movimiento invalido!, intentelo de nuevo",
                             bg = "#8B4513"
                             )
+        elif direccion == "S":
+            verificar_victoria()
+
+        elif direccion == "*":
+            objetos -= 1
+            mov_restantes -= 1
+            matriz[fila][colum] = "."
+            matriz[nueva_fila][colum] = "J"
+            mover_jugador(matriz, fila, colum, nueva_fila, colum)
+            mover_guardias(matriz)
+            
         else:
             error.configure(text = "",
                             bg = "#A0522D"
@@ -457,15 +502,36 @@ def mover_guardias(matriz):
 def vigilante():
     i = 0
 
-#E:
-#S:
-#R:
-def verificar_captura():
-    i = 0
+#E: Vacio
+#S: Se dirige a pantalla de victoria si cumple con los requisitos para superar el nnivel. O no hace nada
+#R: N/A
+def verificar_victoria():
+    listaa = abajo.winfo_children()
+    #Apoyo de la ia con la sintaxis para borrrar todo menos un label en especifico
+    for elemento in listaa:
+        if "Mover" not in elemento.cget("text"):
+            elemento.destroy()
+            
+    error = tk.Label(abajo,
+                     fg = "#FFD700",
+                     font = ("Arial",11)
+                     )
+    error.pack(expand = True)
+    
+    global objetos
+    #Primero es false si no hay ninguno. Luego cambia a la cantidad que haya
+    #No solo debe llegar al final, sino haber obtenido los objetos del nivel
+    if objetos == 0:
+        pantalla_victoria()
+        
+    else:
+        error.configure(text= "Movimiento invalido!, aun no has obtenido todos los items de este nivel",
+                        bg = "#8B4513"
+                        )
 
 #E: Recibe el motivo de la derrota (Captura por patrulleros o falta de movimientos
 #S: Muestra en la pantalla un mensaje de que perdio el juego y le da la opcion de ir al menu principal o volver a seleccionar el nivel
-#R:
+#R: N/A
 def pantalla_derrota(motivo):
     listaa = arriba.winfo_children()
     listaa += abajo.winfo_children()
@@ -520,15 +586,57 @@ def pantalla_derrota(motivo):
     cerrar.pack(expand = True)
   
 
-#E:
-#S:
-#R:
+#E: Vacio
+#S: Muestra en la pantalla un mensaje de que ganó el juego y le da la opcion de ir al menu principal o volver a seleccionar el nivel
+#R: N/A
 def pantalla_victoria():
-    global objetos
-    #Primero es false si no hay ninguno. Luego cambia a la cantidad que haya
-    #No solo debe llegar al final, sino haber obtenido los objetos del nivel
-    i = 0
+    listaa = arriba.winfo_children()
+    listaa += abajo.winfo_children()
+    listaa += der.winfo_children()
+    listaa += cen.winfo_children()
+    for elemento in listaa:
+        elemento.destroy()
 
+    global nombre_usuario_global
+
+    titulo = tk.Label(arriba,
+                      text="Has superado el laberinto!",
+                      fg = "#FFFFFF",
+                      font=("Arial", 19),
+                      bg = "#87CEEB"
+                      )
+    titulo.pack(expand = True)
+
+    msj_gano = tk.Label(cen,
+                        text="Felicidades! Has ganado el nivel",
+                        fg = "#FFFFFF",
+                        font=("Arial", 14),
+                        bg = "#F4A460"
+                        )
+    msj_gano.pack(expand = True)
+
+    #---------------------Arreglar--------------------
+        #Ademas de los mensajes, se debe actualizar el progreso.txt y verificar en marcas.txt
+    #es necesario revisar ambos archivos de texto y modificarlos
+
+    volver = tk.Button(cen,
+                       text="Volver a selección de nivel",
+                       command=lambda : seleccionar_nivel(nombre_usuario_global)
+                       )
+    volver.pack(expand = True)
+
+    regresar = tk.Button(cen,
+                         text="Regresar al menu principal",
+                         command=lambda : menu_principal()
+                         )
+    regresar.pack(expand = True)
+
+    cerrar = tk.Button(cen,
+                       text="Cerrar programa",
+                       command =ventana.destroy
+                       )
+    cerrar.pack(expand = True)
+        
 
 #E: Recibe la matriz ya lista
 #S: Muestra una lista de labels donde cada uno contiene 1 caracter representante de la matriz
@@ -653,8 +761,6 @@ def info_matriz(nombre_nivel):
     nivel_max_mov.pack(expand = True)
 
         #-------------------- Arreglar --------------------#
-    #cont_mov = tk.Label(der)
-
     cont_mov = tk.Label(der,#Arreglar esto porque siempre dice la misma cant 
                           text= "Movimientos restante: " + str(mov_restantes),
                           fg = "#FFFACD",
