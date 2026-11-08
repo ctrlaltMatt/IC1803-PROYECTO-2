@@ -18,6 +18,7 @@ cant_max_mov = 0
 mov_restantes = cant_max_mov #Se le va a ir restando con cada movimiento valido
 objetos = False #Luego se le cambia a un numero enterto
 matriz_labels = []
+patrulleros = []
 
 
 #E: Recibe el nombre de archivo del nivel que se selecciono por el usuario
@@ -86,6 +87,20 @@ def validar_matriz(m):
             if i == 0 or i == len(m)-1 or j == 0 or j == len(m[0])-1:
                 if m[i][j] != "#":
                     return False
+
+            #patrulleros = [i, j, "direccion" {d,izq,ae,ab}]
+            if m[i][j] == "<":
+                patrulleros = patrulleros + [i, j, "d"]
+                
+            if m[i][j] == ">":
+                patrulleros = patrulleros + [i, j, "izq"]
+                
+            if m[i][j] == "^":
+                patrulleros = patrulleros + [i, j, "ar"]
+                
+            if m[i][j] == "v":
+                patrulleros = patrulleros + [i, j, "ab"]
+                
             if m[i][j] == "J":
                 jugador += 1
                 
@@ -221,6 +236,7 @@ def validar_mov(event):
             matriz[fila][colum] = "."
             matriz[nueva_fila][colum] = "J"
             mover_jugador(matriz, fila, colum, nueva_fila, colum)
+            mover_guardias(matriz)
         
     elif event.keysym == "Down":
         nueva_fila = fila +1
@@ -237,6 +253,7 @@ def validar_mov(event):
             matriz[fila][colum] = "."
             matriz[nueva_fila][colum] = "J"
             mover_jugador(matriz, fila, colum, nueva_fila, colum)
+            mover_guardias(matriz)
         
             
     elif event.keysym == "Left":
@@ -254,6 +271,7 @@ def validar_mov(event):
             matriz[fila][colum] = "."
             matriz[fila][nueva_colum] = "J"
             mover_jugador(matriz, fila, colum, fila, nueva_colum)
+            mover_guardias(matriz)
         
     elif event.keysym == "Right":
         nueva_colum = colum + 1
@@ -270,6 +288,7 @@ def validar_mov(event):
             matriz[fila][colum] = "."
             matriz[fila][nueva_colum] = "J"
             mover_jugador(matriz, fila, colum, fila, nueva_colum)
+            mover_guardias(matriz)
         
 
 #E: Recibe la matriz del juego y las posiciones tanto actual del jugador, como de su destino
@@ -300,6 +319,8 @@ def mover_jugador(matriz, fila, colum, nueva_fila, nueva_colum):
 #S:
 #R:
 def mover_guardias(matriz):
+    #patrulleros = [i, j, "direccion" {d,izq,ae,ab}]
+    global patrulleros
     i = 0
     #Tanto patrullas como vigilantes
     #Verificar captura, ver si ya capturo al jugador y eso lleva a derrota
@@ -742,6 +763,9 @@ def validar_usuario_inicio(user):
     with open("progreso.txt", "r") as nombre_usuarios:
         todo = nombre_usuarios.readlines()
 
+    #--------------------Arreglar----------------------------------
+    #Muestra tantas veces el texto en la parte superior como nombres invalidos
+
     i = 0
     while i < len(todo):
         usuario = todo[i].strip().split(";")
@@ -805,7 +829,8 @@ def validar_usuario_cargar(user):
             error.pack()
             encontrado = True
         i += 1
-        
+    #--------------------Arreglar----------------------------------
+    #No muestra el texto
     if encontrado:
         print("Hay coincidencias.Cargando su partida!!")
         error.configure(text = "Cargando su partida!",
@@ -986,18 +1011,27 @@ def mejores_marcas():
     listaa += cen.winfo_children()
     for elemento in listaa:
         elemento.destroy()
-        
-    #Funcion que revise marcas.txt y que por cada nivel muestre toda la info
-    ranking = tk.Label(der,
-                      text= "Nivel 3",
-                      )
-    
-    ranking.pack(expand = True)
+
     marca = tk.Label(cen,
-                     text="Nivel:  \t  Mejores marcas:  \t  Jugador: ",
+                     text="Nivel:    Mejores marcas:    Jugador: ",
                      )
     
-    marca.pack(expand = True)
+    marca.pack()
+
+    #Funcion que revise marcas.txt y que por cada nivel muestre toda la info
+    with open("marcas.txt","r") as texto_marcas:
+        todo_ranking = texto_marcas.readlines()
+    for linea in todo_ranking:
+        if linea.strip() != "":
+            linea = linea.strip().split(";")
+            pos_num = len(linea[0])-1
+            ranking = tk.Label(cen,
+                               text= "Nivel " + linea[0][pos_num] + " \t    " + linea[1] + "\t" + linea[2]
+                               )
+            ranking.pack()
+            #La primera palabra queda "nivel3" por lo cual se toma solo el ultimo digito para que visualmente se vea bien
+            
+        
 
     #Aqui va la auxiliar que muestra lo que esta en el .txt
 
@@ -1024,7 +1058,7 @@ ventana = tk.Tk()
 ventana.title("Laberinto")
 ventana.geometry("800x550")
 ventana.config(padx=20 , pady=20)
-ventana.resizable(False, False)
+#ventana.resizable(False, False)
 
 
 

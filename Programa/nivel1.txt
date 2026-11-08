@@ -1,4 +1,4 @@
-Bodega abandonada;45
+Laboratorio abandonado;45
 ##########
 #J..#...*#
 #.##.#.#.#
