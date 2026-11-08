@@ -46,10 +46,8 @@ def cargar_nivel(nombre_archi):
         print("Matriz valida") #Luego eliminar esto
         dibujar_matriz(matriz)
         info_matriz(nombre_archi)
-        print(matriz)
     else:
         print("Matriz ingresada para dicho nivel es invalida, error")
-        print(matriz)
     
     
 
@@ -517,7 +515,6 @@ def verificar_victoria():
                      font = ("Arial",11)
                      )
     error.pack(expand = True)
-    
     global objetos
     #Primero es false si no hay ninguno. Luego cambia a la cantidad que haya
     #No solo debe llegar al final, sino haber obtenido los objetos del nivel
