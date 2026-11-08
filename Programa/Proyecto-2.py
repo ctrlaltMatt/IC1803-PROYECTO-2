@@ -240,6 +240,7 @@ def validar_mov(event):
                             )
         elif direccion == "S":
             verificar_victoria()
+            return
 
         elif direccion == "*":
             objetos -= 1
@@ -268,6 +269,7 @@ def validar_mov(event):
                             )
         elif direccion == "S":
             verificar_victoria()
+            return
             
         elif direccion == "*":
             objetos -= 1
@@ -297,13 +299,14 @@ def validar_mov(event):
                             )
         elif direccion == "S":
             verificar_victoria()
+            return
 
         elif direccion == "*":
             objetos -= 1
             mov_restantes -= 1
             matriz[fila][colum] = "."
-            matriz[nueva_fila][colum] = "J"
-            mover_jugador(matriz, fila, colum, nueva_fila, colum)
+            matriz[fila][nueva_colum] = "J"
+            mover_jugador(matriz, fila, colum, fila, nueva_colum)
             mover_guardias(matriz)
             
         else:
@@ -325,13 +328,14 @@ def validar_mov(event):
                             )
         elif direccion == "S":
             verificar_victoria()
+            return
 
         elif direccion == "*":
             objetos -= 1
             mov_restantes -= 1
             matriz[fila][colum] = "."
-            matriz[nueva_fila][colum] = "J"
-            mover_jugador(matriz, fila, colum, nueva_fila, colum)
+            matriz[fila][nueva_colum] = "J"
+            mover_jugador(matriz, fila, colum, fila, nueva_colum)
             mover_guardias(matriz)
             
         else:
@@ -369,9 +373,9 @@ def mover_jugador(matriz, fila, colum, nueva_fila, nueva_colum):
       
 
 
-#E:
-#S:
-#R:
+#E: Matriz
+#S: Todas las patrullas que existan en el nivel se mueven.
+#R: N/A
 def mover_guardias(matriz):
     #patrulleros = [i, j, "direccion"] {d,izq,ar,ab}
     global patrulleros
@@ -505,6 +509,9 @@ def vigilante():
 #R: N/A
 def verificar_victoria():
     listaa = abajo.winfo_children()
+    global nombre_usuario_global
+    global cant_max_mov 
+    global mov_restantes
     #Apoyo de la ia con la sintaxis para borrrar todo menos un label en especifico
     for elemento in listaa:
         if "Mover" not in elemento.cget("text"):
@@ -519,6 +526,42 @@ def verificar_victoria():
     #Primero es false si no hay ninguno. Luego cambia a la cantidad que haya
     #No solo debe llegar al final, sino haber obtenido los objetos del nivel
     if objetos == 0:
+        #Si ya gano, actualice su nivel yy compare mejores marcas
+        with open("progreso.txt", "r") as progresos:
+            todos = progresos.readlines()
+        with open("niveles_existentes.txt", "r") as todos_niveles:
+            niveles = todos_niveles.readlines()
+            
+        with open("marcas.txt", "r") as m_marcas:
+            mejores = m_marcas.readlines()
+        with open("progreso.txt", "w") as progreso_e:
+            comp = "nivel"
+            for usuario in todos:
+                usuario = usuario.strip().split(";")
+                #revisa si es jugador actual y modifica su nivel
+                if usuario[0].title() == nombre_usuario_global.title():
+                    int_nivel = int(usuario[1])+1
+                    if int_nivel > len(niveles):
+                        int_nivel -= 1
+                    progreso_e.write(nombre_usuario_global.title() + ";"+ str(int_nivel) + "\n")
+                    comp = "nivel" + usuario[1]
+                else:
+                    progreso_e.write(usuario[0] + ";"+  usuario[1]+  "\n")
+
+        with open("marcas.txt", "w") as mejores_marcas:
+            for marca in mejores:
+                marca = marca.strip().split(";")
+                if comp == marca[0]:
+                    if int(marca[1]) >= (mov_restantes - cant_max_mov):
+                        marca[1] = str(mov_restantes - cant_max_mov)
+                        marca[2] = nombre_usuario_global
+                        mejores_marcas.write(marca[0]+ ";"+ marca[1] + ";"+ marca[2]+"\n")
+                        
+                    else:
+                        mejores_marcas.write(marca[0]+ ";"+ marca[1] + ";"+ marca[2]+"\n")
+                else:
+                    mejores_marcas.write(marca[0]+ ";"+ marca[1] + ";"+ marca[2]+"\n")
+                        
         pantalla_victoria()
         
     else:
@@ -874,7 +917,7 @@ def menu_principal():
 
     titulo = tk.Label(arriba,
                       text="Laberinto",
-                      fg = "#B8860B",
+                      fg = "#edb428",
                       font=("Arial", 18),
                       bg = "#87CEEB"
                       )
@@ -1125,7 +1168,7 @@ def seleccionar_nivel(jugador):
 
     titulo = tk.Label(arriba,
                       text="Laberinto",
-                      fg = "#FFD700",
+                      fg = "#edb428",
                       font=("Arial", 18),
                       bg = "#87CEEB"
                       )
@@ -1209,7 +1252,7 @@ def mostrar_niveles(user_name):
     i = 0
     #nivel_desblo
     while i < len(niveles):
-        nivel_actual = i+1
+        nivel_actual = i#+1
         if nivel_actual <= int(nivel_desblo):
             lista_botones[i].configure(state = "normal",
                                        bg = "#DC143C",
@@ -1238,23 +1281,46 @@ def mejores_marcas():
     for elemento in listaa:
         elemento.destroy()
 
-    marca = tk.Label(cen,
-                     text="Nivel:    Mejores marcas:    Jugador: ",
+    NIVEL = tk.Label(cen,
+                     text="Nivel: ",
+                     fg = "#FFFFFF",
+                     bg = "#A0522D",
+                     font=("Arial", 14)
                      )
     
-    marca.pack()
-
+    NIVEL.grid(row = 0, column = 0)
+    mejores_m = tk.Label(cen,
+                         text="Mejores marcas: ",
+                         fg = "#FFFFFF",
+                         bg = "#A0522D",
+                         font=("Arial", 14)
+                         )
+    
+    mejores_m.grid(row = 0, column = 1)
+    
+    mejores_m = tk.Label(cen,
+                         text="Jugador: ",
+                         fg = "#FFFFFF",
+                         bg = "#A0522D",
+                         font=("Arial", 14)
+                         )
+    
+    mejores_m.grid(row = 0, column = 2)
     #Funcion que revise marcas.txt y que por cada nivel muestre toda la info
     with open("marcas.txt","r") as texto_marcas:
         todo_ranking = texto_marcas.readlines()
+    i = 0
     for linea in todo_ranking:
+        i += 1
         if linea.strip() != "":
             linea = linea.strip().split(";")
             pos_num = len(linea[0])-1
             ranking = tk.Label(cen,
-                               text= "Nivel " + linea[0][pos_num] + " \t    " + linea[1] + "\t" + linea[2]
+                               text= "Nivel " + linea[0][pos_num] + " \t    " + linea[1] + "\t" + linea[2],
+                               fg = "#edb428",
+                               bg = "#A0522D",
                                )
-            ranking.pack()
+            ranking.pack(expand = True)
             #La primera palabra queda "nivel3" por lo cual se toma solo el ultimo digito para que visualmente se vea bien
             
         

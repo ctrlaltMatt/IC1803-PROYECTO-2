@@ -1,4 +1,4 @@
-Laboratorio abandonado;45
+Laboratorio abandonado;41
 ##########
 #J...#.*A#
 #...####.#
