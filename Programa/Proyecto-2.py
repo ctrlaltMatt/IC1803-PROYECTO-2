@@ -12,6 +12,37 @@ mov_restantes = cant_max_mov #Se le va a ir restando con cada movimiento valido
 objetos = False #Luego se le cambia a un numero enterto
 matriz_labels = []
 patrulleros = []
+llaves_recogidas = []
+
+
+#E: Vacio
+#S: Si los archivos .txt no existe los crea
+#R: N/A
+def verificar_crear_archi_texto():
+    try:
+        with open("progreso.txt", "r") as archivo_texto:
+            texto = archivo_texto.readlines()
+        if len(texto) <= 1 or texto == "" or texto[0].strip().split(";") == [""]:
+            with open("progreso.txt", "w") as progreso_e:
+                progreso_e.write("Matt;5\n + Wile;2\n + Jeanca;4\n")
+
+        with open("marcas.txt", "r") as m_marcas:
+            mejores = m_marcas.readlines()
+        if len(mejores)<= 1 or mejores == "" or mejores[0].strip().split(";") == [""]:
+            with open("marcas.txt", "w") as marcas_e:
+                marcas_e.write("nivel1;41;wile\nnivel2;38;wile\nnivel3;39;matt\nnivel4;33;jeanca\nnivel5;42;matt\n")
+
+            
+    except FileNotFoundError:
+        with open("marcas.txt", "w") as marcas_e:
+            progreso_e.write("nivel1;41;wile\nnivel2;38;wile\nnivel3;39;matt\nnivel4;33;jeanca\nnivel5;42;matt\n")
+        with open("progreso.txt", "w") as progreso_e:
+            marcas_e.write("Matt;5\nWile;2\nJeanca;4\n")
+        
+        
+
+    
+        
 
 #E: Recibe el nombre de archivo del nivel que se selecciono por el usuario
 #S: Retorna una matriz interna que sera en la que se modificara todo
@@ -62,6 +93,8 @@ def limpiar_variables_globales():
     global objetos
     global matriz_labels
     global patrulleros
+    global llaves_recogidas 
+    llaves_recogidas = []
     modo_juego = ""
     llaves_nivel = []
     puertas_nivel = []
@@ -202,6 +235,7 @@ def validar_mov(event):
     global matriz
     global mov_restantes
     global objetos
+    global llaves_recogidas # =[]
     
     fila = 0
     colum = 0
@@ -228,8 +262,10 @@ def validar_mov(event):
             if celda == "J":
                 fila = i
                 colum = j
-    
-    #Para crear esta función si se busco en internet y se apoyo de la ia utilizandola como guia/tutor
+
+                
+    puertas = ["A", "B", "C", "D", "E", "F", "G", "H", "I"]
+    llaves = ["1", "2", "3", "4", "5", "6", "7", "8", "9"]
     if event.keysym == "Up":
         nueva_fila = fila -1
         direccion = matriz[nueva_fila][colum]
@@ -249,6 +285,28 @@ def validar_mov(event):
             matriz[nueva_fila][colum] = "J"
             mover_jugador(matriz, fila, colum, nueva_fila, colum)
             mover_guardias(matriz)
+
+        elif direccion in llaves:
+            llaves_recogidas += [direccion]
+            mov_restantes -= 1
+            matriz[fila][colum] = "."
+            matriz[nueva_fila][colum] = "J"
+            mover_jugador(matriz, fila, colum, nueva_fila, colum)
+            mover_guardias(matriz)
+
+        elif direccion in puertas:
+            if probar_puerta(direccion):
+                mov_restantes -= 1
+                matriz[fila][colum] = "."
+                matriz[nueva_fila][colum] = "J"
+                mover_jugador(matriz, fila, colum, nueva_fila, colum)
+                mover_guardias(matriz)
+            else:
+                error.configure(text = "Movimiento invalido!, No tienes la llave necesaria para esta puerta",
+                            bg = "#8B4513"
+                            )
+                
+    #---------------- Recoger llave-----------------------------------------
             
         else:
             error.configure(text = "",
@@ -259,6 +317,7 @@ def validar_mov(event):
             matriz[nueva_fila][colum] = "J"
             mover_jugador(matriz, fila, colum, nueva_fila, colum)
             mover_guardias(matriz)
+            
         
     elif event.keysym == "Down":
         nueva_fila = fila +1
@@ -278,6 +337,26 @@ def validar_mov(event):
             matriz[nueva_fila][colum] = "J"
             mover_jugador(matriz, fila, colum, nueva_fila, colum)
             mover_guardias(matriz)
+
+        elif direccion in llaves:
+            llaves_recogidas += [direccion]
+            mov_restantes -= 1
+            matriz[fila][colum] = "."
+            matriz[nueva_fila][colum] = "J"
+            mover_jugador(matriz, fila, colum, nueva_fila, colum)
+            mover_guardias(matriz)
+
+        elif direccion in puertas:
+            if probar_puerta(direccion):
+                mov_restantes -= 1
+                matriz[fila][colum] = "."
+                matriz[nueva_fila][colum] = "J"
+                mover_jugador(matriz, fila, colum, nueva_fila, colum)
+                mover_guardias(matriz)
+            else:
+                error.configure(text = "Movimiento invalido!, No tienes la llave necesaria para esta puerta",
+                            bg = "#8B4513"
+                            )
             
         else:
             error.configure(text = "",
@@ -308,6 +387,22 @@ def validar_mov(event):
             matriz[fila][nueva_colum] = "J"
             mover_jugador(matriz, fila, colum, fila, nueva_colum)
             mover_guardias(matriz)
+
+        elif direccion in llaves:
+            llaves_recogidas += [direccion]
+            mov_restantes -= 1
+            matriz[fila][colum] = "."
+            matriz[fila][nueva_colum] = "J"
+            mover_jugador(matriz, fila, colum, fila, nueva_colum)
+            mover_guardias(matriz)
+
+        elif direccion in puertas:
+            if probar_puerta(direccion):
+                mov_restantes -= 1
+                matriz[fila][colum] = "."
+                matriz[fila][nueva_colum] = "J"
+                mover_jugador(matriz, fila, colum, fila, nueva_colum)
+                mover_guardias(matriz)
             
         else:
             error.configure(text = "",
@@ -337,6 +432,22 @@ def validar_mov(event):
             matriz[fila][nueva_colum] = "J"
             mover_jugador(matriz, fila, colum, fila, nueva_colum)
             mover_guardias(matriz)
+
+        elif direccion in llaves:
+            llaves_recogidas += [direccion]
+            mov_restantes -= 1
+            matriz[fila][colum] = "."
+            matriz[fila][nueva_colum] = "J"
+            mover_jugador(matriz, fila, colum, fila, nueva_colum)
+            mover_guardias(matriz)
+
+        elif direccion in puertas:
+            if probar_puerta(direccion):
+                mov_restantes -= 1
+                matriz[fila][colum] = "."
+                matriz[fila][nueva_colum] = "J"
+                mover_jugador(matriz, fila, colum, fila, nueva_colum)
+                mover_guardias(matriz)
             
         else:
             error.configure(text = "",
@@ -371,7 +482,26 @@ def mover_jugador(matriz, fila, colum, nueva_fila, nueva_colum):
                 cont_mov.configure(text= "Movimientos restante: " + str(mov_restantes))
                 cont_mov.pack(expand = True)
       
+#E: Recibe el str de la puerta que tiene al frente
+#S: Retorna True si ya tiene la llave para dicha puerta. False de lo contrario
+#R: N/A
+def probar_puerta(puerta):
+    puertas_list = ["A", "B", "C", "D", "E", "F", "G", "H", "I"]
+    llaves_list = ["1", "2", "3", "4", "5", "6", "7", "8", "9"]
 
+    global llaves_recogidas
+    for indice, dato in enumerate(puertas_list):
+        if dato == puerta:
+            puerta = llaves_list[indice]
+            break
+        
+    for llave in llaves_recogidas:
+        if llave == puerta:
+            return True
+    return False
+        
+            
+    
 
 #E: Matriz
 #S: Todas las patrullas que existan en el nivel se mueven.
@@ -945,6 +1075,8 @@ def menu_principal():
                       command=ventana.destroy
                       )
     salir.pack( expand = True)
+
+    verificar_crear_archi_texto()
 
 
 
