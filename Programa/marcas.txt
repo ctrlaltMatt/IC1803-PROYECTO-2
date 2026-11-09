@@ -1,5 +1,5 @@
-nivel1;7;wile
-nivel2;7;wile
-nivel3;19;wile
-nivel4;13;wile
-nivel5;1;matt
+nivel1;41;wile
+nivel2;38;wile
+nivel3;39;matt
+nivel4;42;jeanca
+nivel5;42;wile

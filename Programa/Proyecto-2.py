@@ -12,6 +12,7 @@ mov_restantes = cant_max_mov #Se le va a ir restando con cada movimiento valido
 objetos = False #Luego se le cambia a un numero enterto
 matriz_labels = []
 patrulleros = []
+vigilantes = []
 llaves_recogidas = []
 
 
@@ -35,9 +36,9 @@ def verificar_crear_archi_texto():
             
     except FileNotFoundError:
         with open("marcas.txt", "w") as marcas_e:
-            progreso_e.write("nivel1;41;wile\nnivel2;38;wile\nnivel3;39;matt\nnivel4;33;jeanca\nnivel5;42;matt\n")
+            marcas_e.write("nivel1;41;wile\nnivel2;38;wile\nnivel3;39;matt\nnivel4;33;jeanca\nnivel5;42;matt\n")
         with open("progreso.txt", "w") as progreso_e:
-            marcas_e.write("Matt;5\nWile;2\nJeanca;4\n")
+            progreso_e.write("Matt;5\nWile;2\nJeanca;4\n")
         
         
 
@@ -93,7 +94,8 @@ def limpiar_variables_globales():
     global objetos
     global matriz_labels
     global patrulleros
-    global llaves_recogidas 
+    global llaves_recogidas
+    global vigilantes 
     llaves_recogidas = []
     modo_juego = ""
     llaves_nivel = []
@@ -101,6 +103,7 @@ def limpiar_variables_globales():
     objetos = False
     matriz_labels = []
     patrulleros = []
+    vigilantes = []
         
 
 
@@ -121,6 +124,7 @@ def validar_matriz(m):
     global objetos
     puerta_llave = []
     global patrulleros
+    global vigilantes
     
     i = 0
     while i < len(m):
@@ -142,6 +146,9 @@ def validar_matriz(m):
                 
             if m[i][j] == "v":
                 patrulleros = patrulleros + [[i, j, "ab"]]
+                
+            if m[i][j] == "O":
+                vigilantes = vigilantes + [[i, j]]
                 
             if m[i][j] == "J":
                 jugador += 1
@@ -253,6 +260,7 @@ def validar_mov(event):
     error = tk.Label(abajo,
                      text= "",
                      fg = "#FFD700",
+                     bg="#8B4513",
                      font = ("Arial",11)
                      )
     error.pack(expand = True)
@@ -458,6 +466,7 @@ def validar_mov(event):
             matriz[fila][nueva_colum] = "J"
             mover_jugador(matriz, fila, colum, fila, nueva_colum)
             mover_guardias(matriz)
+            
         
 
 #E: Recibe la matriz del juego y las posiciones tanto actual del jugador, como de su destino
@@ -509,8 +518,9 @@ def probar_puerta(puerta):
 def mover_guardias(matriz):
     #patrulleros = [i, j, "direccion"] {d,izq,ar,ab}
     global patrulleros
-
     global matriz_labels
+    
+    global vigilantes
 
     if patrulleros == []:
         return
@@ -624,15 +634,138 @@ def mover_guardias(matriz):
                 matriz_labels[i][j].configure(text= matriz[i][j],
                                               fg = "#DC143C"
                                               )
+    if vigilantes != []:
+        vigilante(matriz)
     #Tanto patrullas como vigilantes
     #Verificar captura, ver si ya capturo al jugador y eso lleva a derrota
             
 
-#E:
-#S:
-#R:
-def vigilante():
-    i = 0
+#E: Recibe la matriz sobre la cual se movera
+#S: Si ve al jugador en su misma fila o columna se mueve un espacio en esa direccion. Si no lo ve se queda quieto
+#R: N/A
+def vigilante(matriz):
+    global vigilantes
+    global matriz_labels
+
+    if vigilantes == []:
+        return
+    for vigilante in vigilantes:
+        i = vigilante[0]
+        j = vigilante[1]
+        #Revisar TODA su fila y luego TODA su columna
+        #revisar fila
+        
+        if matriz[i][j] == "J":
+            return pantalla_derrota("vigilante")
+
+        if i < len(matriz)-2:
+            #Abajo i+1
+            fila = i+1 #Empieza de una vez mirando a la casilla que tiene "al frente"
+            while fila < len(matriz)-1:
+                if matriz[fila][j] == "." or matriz[fila][j] == "*":
+                    fila += 1 #Avanza en el ciclo
+                    
+                elif matriz[fila][j] == "J":
+                    if matriz[i+1][j] == "J":
+                        return pantalla_derrota("vigilante")
+
+                    #-----------AQUI----------------
+                    #Si esta libre el paso avanza. Si donde desea moverse
+                    #hay un objeto, solo se actualiza los labels, se mantiene el objeto debajo
+                    if matriz[i+1][j] == ".": #i+1
+                        matriz[i][j] = "."
+                        matriz[i+1][j] = "O"
+                        #Actualizar tanto la matriz como los labels
+                        matriz_labels[i][j].configure(text= matriz[i][j],
+                                                      fg = "#EEDD82"
+                                                      )
+                        matriz_labels[i+1][j].configure(text= matriz[i+1][j],
+                                                        fg = "#DC143C"
+                                                        )
+                        vigilante[0] = i+1
+                        #Avanza 1 en la fila
+                else: #pared/patrulleros/llaves/puertas
+                    break
+                fila += 1
+                    #se detiene y revisa los demas si aún no se a movido
+                    
+            
+            
+        if i > 1:
+            #Arriba i-1
+            fila = i-1
+            while fila > 1:
+                if matriz[fila][j] == "." or matriz[fila][j] == "*":
+                    fila -= 1
+                    
+                elif matriz[fila][j] == "J":
+                    if matriz[i-1][j] == "J":
+                        return pantalla_derrota("vigilante")
+                    if matriz[i-1][j] == ".": #i-1
+                        matriz[i][j] = "."
+                        matriz[i-1][j] = "O"
+                        matriz_labels[i][j].configure(text= matriz[i][j],
+                                                      fg = "#EEDD82"
+                                                      )
+                        matriz_labels[i-1][j].configure(text= matriz[i-1][j],
+                                                        fg = "#DC143C"
+                                                        )
+                        vigilante[0] = i-1
+                else: 
+                    break
+                fila -= 1
+            
+
+        if j > 1:
+            #Izq j-1
+            colum = j-1
+            while colum > 1:
+                if matriz[i][colum] == "." or matriz[i][colum] == "*":
+                    colum -= 1
+                    
+                elif matriz[i][colum] == "J":
+                    if matriz[i][j-1] == "J":
+                        return pantalla_derrota("vigilante")
+                    if matriz[i][j-1] == ".": #j-1
+                        matriz[i][j] = "."
+                        matriz[i][j-1] = "O"
+                        matriz_labels[i][j].configure(text= matriz[i][j],
+                                                      fg = "#EEDD82"
+                                                      )
+                        matriz_labels[i][j-1].configure(text= matriz[i][j-1],
+                                                        fg = "#DC143C"
+                                                        )
+                        vigilante[1] = j-1
+                else: 
+                    break
+                colum -= 1
+            
+        if j < len(matriz[0])-2:
+            #der j+1
+            colum = j+1
+            while colum < len(matriz[0])-1:
+                if matriz[i][colum] == "." or matriz[i][colum] == "*":
+                    colum += 1
+                    
+                elif matriz[i][colum] == "J":
+                    if matriz[i][j+1] == "J":
+                        return pantalla_derrota("vigilante")
+                    if matriz[i][j+1] == ".": #j+1
+                        matriz[i][j] = "."
+                        matriz[i][j+1] = "O"
+                        matriz_labels[i][j].configure(text= matriz[i][j],
+                                                      fg = "#EEDD82"
+                                                      )
+                        matriz_labels[i][j+1].configure(text= matriz[i][j+1],
+                                                        fg = "#DC143C"
+                                                        )
+                        vigilante[1] = j+1
+                else: 
+                    break
+                colum += 1
+
+
+                
 
 #E: Vacio
 #S: Se dirige a pantalla de victoria si cumple con los requisitos para superar el nnivel. O no hace nada
@@ -682,10 +815,10 @@ def verificar_victoria():
             for marca in mejores:
                 marca = marca.strip().split(";")
                 if comp == marca[0]:
-                    if int(marca[1]) >= (mov_restantes - cant_max_mov):
-                        marca[1] = str(mov_restantes - cant_max_mov)
-                        marca[2] = nombre_usuario_global
-                        mejores_marcas.write(marca[0]+ ";"+ marca[1] + ";"+ marca[2]+"\n")
+                    if int(marca[1]) >= (cant_max_mov - mov_restantes):
+                        sobrante = cant_max_mov - mov_restantes
+                        nombre_user = nombre_usuario_global
+                        mejores_marcas.write(marca[0]+ ";"+ str(sobrante) + ";"+ nombre_user+"\n")
                         
                     else:
                         mejores_marcas.write(marca[0]+ ";"+ marca[1] + ";"+ marca[2]+"\n")
